@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    /* Tema Gelap (Hitam & Emas) - Kontras Tinggi */
+    --bg-color: #0a0a0a; 
+    --card-color: #141414; 
+    --text-main: #f8fafc; 
+    --text-muted: #9ca3af;
+    --accent-color: #d4af37;
+    --accent-hover: #f2ca51;
+    --border-color: #262626; 
+}
+
+.theme-soft {
+    /* Tema Soft (Pink Kalem) - Elegan & Kontras */
+    --bg-color: #fdf2f8; 
+    --card-color: #ffffff; 
+    --text-main: #1f2937; 
+    --text-muted: #6b7280; 
+    --accent-color: #ec4899; 
+    --accent-hover: #db2777; 
+    --border-color: #fbcfe8; 
+}
+
+body { 
+    font-family: 'Inter', system-ui, sans-serif; 
+    background-color: var(--bg-color); 
+    color: var(--text-main);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Utility Classes for Theme */
+.bg-theme-bg { background-color: var(--bg-color); }
+.bg-theme-card { background-color: var(--card-color); }
+.text-theme-text { color: var(--text-main); }
+.text-theme-muted { color: var(--text-muted); }
+.text-theme-accent { color: var(--accent-color); }
+.bg-theme-accent { background-color: var(--accent-color); }
+.border-theme-border { border-color: var(--border-color); }
+.border-theme-accent { border-color: var(--accent-color); }
+.hover\:bg-theme-hover:hover { background-color: var(--accent-hover); }
+.hover\:text-theme-hover:hover { color: var(--accent-hover); }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.animate-fade-in { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.glass-card {
+    background: var(--card-color);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+}
+
+/* Hilangkan spinner pada input bertipe number */
+.no-spinners input[type="number"]::-webkit-outer-spin-button,
+.no-spinners input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Transisi Token Library */
+.library-token { transition: all 0.3s ease; }
+.library-token:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-color: var(--accent-color); }
