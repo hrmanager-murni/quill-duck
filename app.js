@@ -1022,4 +1022,133 @@ const hideLoading = () => {
     ls.classList.add('opacity-0'); setTimeout(() => ls.classList.add('pointer-events-none'), 500);
 };
 
+// =========================================================================
+// FUNGSI BARU: UNDUH LAPORAN EXCEL
+// =========================================================================
+window.downloadLaporanExcel = async () => {
+    if (!window.tempArsipData) return showToast("Silakan klik Analisa terlebih dahulu!", "error");
+    
+    showLoading("Menyiapkan File Excel...");
+    try {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Laporan Kas');
+
+        const sd = window.tempArsipData.startDate;
+        const ed = window.tempArsipData.endDate;
+        const startStr = sd.split('-').reverse().join('/');
+        const endStr = ed.split('-').reverse().join('/');
+
+        let totalBrankas = 0;
+        brankasData.forEach(b => {
+            const amount = parseFloat(b.amount) || 0;
+            if (b.type === 'in_from_kas' || b.type === 'in_external') totalBrankas += amount;
+            else if (b.type === 'out_to_kas') totalBrankas -= amount;
+        });
+
+        sheet.mergeCells('A1:E1');
+        const titleCell = sheet.getCell('A1');
+        titleCell.value = 'LAPORAN ARUS KAS - PAWON NUSANTARA';
+        titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+        titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F2937' } }; 
+        titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        
+        sheet.mergeCells('A2:E2');
+        const periodCell = sheet.getCell('A2');
+        periodCell.value = `Periode: ${startStr} s/d ${endStr}`;
+        periodCell.font = { name: 'Arial', size: 11, italic: true };
+        periodCell.alignment = { vertical: 'middle', horizontal: 'center' };
+
+        sheet.addRow([]); 
+        sheet.addRow(['REKAPITULASI KAS', '', '', '', '']).font = { bold: true };
+        sheet.mergeCells(`A4:E4`);
+        
+        const rekapData = [
+            ['Total Pemasukan (Kas Masuk)', window.tempArsipData.totalIncome],
+            ['Total Pengeluaran (Kas Keluar)', window.tempArsipData.totalExpense],
+            ['Sisa Kas Operasional (Laba Bersih)', window.tempArsipData.netProfit],
+            ['Total Saldo Brankas', totalBrankas]
+        ];
+
+        rekapData.forEach((row, idx) => {
+            const r = sheet.addRow([row[0], row[1]]);
+            r.getCell(1).font = { bold: true };
+            r.getCell(2).numFmt = '"Rp "#,##0'; 
+            
+            let color = 'FFFFFFFF';
+            if (idx === 0) color = 'FFD1FAE5'; 
+            else if (idx === 1) color = 'FFFEE2E2'; 
+            else if (idx === 2) color = 'FFFEF3C7'; 
+            else if (idx === 3) color = 'FFE0F2FE'; 
+
+            r.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+            r.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+            r.getCell(2).font = { bold: true };
+        });
+
+        sheet.addRow([]); 
+        sheet.addRow([]); 
+        
+        const headerRow = sheet.addRow(['Tanggal', 'Kategori', 'Keterangan', 'Tipe Transaksi', 'Nominal']);
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        headerRow.alignment = { horizontal: 'center' };
+        headerRow.eachCell(cell => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } }; 
+            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+        });
+
+        const start = new Date(sd).getTime();
+        const end = new Date(ed).getTime() + 86400000;
+        
+        let sortedMuts = mutations.filter(m => {
+            const t = new Date(m.date).getTime();
+            return t >= start && t < end && !m.isDeleted && !m.isArchived;
+        }).sort((a, b) => new Date(a.date) - new Date(b.date)); 
+
+        sortedMuts.forEach(m => {
+            const typeLabel = m.type === 'income' ? 'Pemasukan' : 'Pengeluaran';
+            const row = sheet.addRow([
+                m.date.split('-').reverse().join('/'),
+                m.category,
+                m.description || '-',
+                typeLabel,
+                parseFloat(m.amount) || 0
+            ]);
+            
+            row.getCell(5).numFmt = '"Rp "#,##0'; 
+            
+            if(m.type === 'income') row.getCell(4).font = { color: { argb: 'FF059669' }, bold: true }; 
+            else row.getCell(4).font = { color: { argb: 'FFE11D48' }, bold: true }; 
+
+            row.eachCell(cell => { cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; });
+        });
+
+        sheet.columns = [
+            { width: 15 }, 
+            { width: 25 }, 
+            { width: 45 }, 
+            { width: 20 }, 
+            { width: 25 }  
+        ];
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `Laporan_Pawon_Nusantara_${startStr.replace(/\//g,'-')}_sd_${endStr.replace(/\//g,'-')}.xlsx`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(url);
+        
+        hideLoading();
+        showToast("Laporan Excel berhasil diunduh!", "success");
+    } catch (err) {
+        hideLoading();
+        console.error(err);
+        showToast("Gagal membuat file Excel.", "error");
+    }
+};
+
 window.onload = () => { initAuth(); window.switchTab('dashboard'); };
