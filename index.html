@@ -12,6 +12,8 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- ExcelJS untuk cetak Laporan -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     
     <!-- MEMANGGIL FILE CSS YANG BARU KITA BUAT -->
     <link rel="stylesheet" href="style.css">
@@ -51,7 +53,6 @@
             </div>
             
             <div class="p-4 space-y-2">
-                <!-- Tab Utama -->
                 <button onclick="window.switchTab('dashboard')" id="btn-tab-dashboard" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg/50">
                     <i class="ph ph-chart-pie-slice text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Dashboard</span>
                 </button>
@@ -68,10 +69,8 @@
                     <i class="ph ph-archive text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Library</span>
                 </button>
                 
-                <!-- Pemisah -->
                 <div class="py-2"><hr class="border-theme-border"></div>
 
-                <!-- Tab Pendukung -->
                 <button onclick="window.switchTab('kategori')" id="btn-tab-kategori" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg/50">
                     <i class="ph ph-gear text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Pengaturan</span>
                 </button>
@@ -91,7 +90,6 @@
     <div class="flex-1 flex flex-col h-full relative w-full">
         <!-- Header -->
         <header class="bg-theme-card/90 backdrop-blur-md border-b border-theme-border h-16 md:h-20 flex items-center justify-between px-4 sm:px-6 shrink-0 z-10">
-            <!-- Mobile Logo -->
             <div class="flex items-center md:hidden space-x-3">
                 <div class="w-10 h-10 rounded-full bg-theme-bg border border-theme-accent flex items-center justify-center shadow-sm shrink-0">
                     <i class="ph ph-feather text-theme-accent text-lg"></i>
@@ -111,7 +109,6 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span class="hidden sm:inline">Online</span>
                 </div>
-                <!-- Mobile Menu Toggle Button -->
                 <button onclick="window.toggleMobileMenu()" class="md:hidden w-10 h-10 flex items-center justify-center bg-theme-bg border border-theme-border rounded-xl text-theme-text">
                     <i class="ph ph-list text-xl"></i>
                 </button>
@@ -383,9 +380,18 @@
                             </div>
                         </div>
 
-                        <div class="pt-6 border-t border-theme-border text-center">
-                            <button onclick="window.openArsipModal()" class="px-8 py-4 bg-theme-card text-theme-accent border border-theme-accent rounded-xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-theme-accent hover:text-slate-900 transition-all flex items-center justify-center mx-auto space-x-2"><i class="ph ph-archive-box text-lg"></i><span>Simpan Laporan Ke Library</span></button>
+                        <!-- BAGIAN TOMBOL TUTUP BUKU YANG SUDAH DIPERBARUI -->
+                        <div class="pt-6 border-t border-theme-border flex flex-col sm:flex-row justify-center gap-4">
+                            <!-- Tombol Unduh Excel Baru -->
+                            <button onclick="window.downloadLaporanExcel()" class="px-8 py-4 bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-emerald-600 hover:-translate-y-1 transition-all flex items-center justify-center space-x-2">
+                                <i class="ph ph-file-xls text-xl"></i><span>Unduh Excel</span>
+                            </button>
+                            <!-- Tombol Simpan ke Library (Asli) -->
+                            <button onclick="window.openArsipModal()" class="px-8 py-4 bg-theme-card text-theme-accent border border-theme-accent rounded-xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-theme-accent hover:text-slate-900 transition-all flex items-center justify-center space-x-2">
+                                <i class="ph ph-archive-box text-xl"></i><span>Simpan Ke Library</span>
+                            </button>
                         </div>
+                        
                     </div>
                 </div>
             </div>
@@ -450,9 +456,7 @@
         </main>
     </div>
 
-    <!-- SEMUA MODAL POP-UP DI BAWAH INI (TIDAK ADA PERUBAHAN STRUKTUR) -->
-    
-    <!-- Modal Detail Laporan Library -->
+    <!-- SEMUA MODAL POP-UP DI BAWAH INI -->
     <div id="library-detail-modal" class="hidden fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-[60] flex-col overflow-y-auto">
         <div class="w-full max-w-6xl mx-auto p-4 sm:p-6 min-h-screen flex flex-col relative">
             <div class="flex justify-between items-center bg-theme-card border border-theme-border p-4 rounded-3xl shadow-xl sticky top-4 z-10 shrink-0">
@@ -781,7 +785,7 @@
         </div>
     </div>
 
-    <!-- Script Database & Logika Aplikasi (Kita pisah ke file tersendiri) -->
+    <!-- Script Database & Logika Aplikasi -->
     <script type="module" src="firebase-db.js"></script>
     <script type="module" src="app.js"></script>
 
