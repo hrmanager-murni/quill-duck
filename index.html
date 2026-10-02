@@ -18,7 +18,7 @@
     <!-- MEMANGGIL FILE CSS YANG BARU KITA BUAT -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="h-screen overflow-hidden flex flex-col md:flex-row selection:bg-theme-accent selection:text-white">
+<body class="h-screen overflow-hidden flex flex-col md:flex-row">
 
     <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-theme-bg transition-opacity duration-500">
@@ -352,7 +352,7 @@
                                     <option value="ALL">Semua Kategori</option>
                                 </select>
                                 <div class="flex items-center space-x-2 flex-1 relative">
-                                    <input type="date" id="filter-income-date" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border text-theme-text text-xs font-semibold rounded-xl px-3 py-3 outline-none w-full focus:border-emerald-500 shadow-inner [color-scheme:dark]">
+                                    <input type="date" id="filter-income-date" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border text-theme-text text-xs font-semibold rounded-xl px-3 py-3 outline-none w-full focus:border-emerald-500 shadow-inner ">
                                     <button onclick="document.getElementById('filter-income-date').value=''; window.filterMutasiTables()" class="absolute right-2 top-2 w-8 h-8 bg-theme-bg rounded-lg flex items-center justify-center text-theme-muted hover:text-rose-500 hover:bg-theme-card transition-colors"><i class="ph ph-x"></i></button>
                                 </div>
                             </div>
@@ -389,7 +389,7 @@
                                     <option value="ALL">Semua Kategori</option>
                                 </select>
                                 <div class="flex items-center space-x-2 flex-1 relative">
-                                    <input type="date" id="filter-expense-date" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border text-theme-text text-xs font-semibold rounded-xl px-3 py-3 outline-none w-full focus:border-rose-500 shadow-inner [color-scheme:dark]">
+                                    <input type="date" id="filter-expense-date" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border text-theme-text text-xs font-semibold rounded-xl px-3 py-3 outline-none w-full focus:border-rose-500 shadow-inner ">
                                     <button onclick="document.getElementById('filter-expense-date').value=''; window.filterMutasiTables()" class="absolute right-2 top-2 w-8 h-8 bg-theme-bg rounded-lg flex items-center justify-center text-theme-muted hover:text-rose-500 hover:bg-theme-card transition-colors"><i class="ph ph-x"></i></button>
                                 </div>
                             </div>
@@ -657,7 +657,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[9px] font-black text-theme-muted mb-2 uppercase tracking-widest">Tanggal</label>
-                            <input type="date" id="exp-date" required class="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-theme-text text-xs font-bold outline-none focus:border-rose-500 shadow-inner [color-scheme:dark]"/>
+                            <input type="date" id="exp-date" required class="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-theme-text text-xs font-bold outline-none focus:border-rose-500 shadow-inner "/>
                         </div>
                         <div>
                             <label class="block text-[9px] font-black text-theme-muted mb-2 uppercase tracking-widest">Kategori</label>
@@ -721,7 +721,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[9px] font-black text-theme-muted mb-2 uppercase tracking-widest">Tanggal</label>
-                        <input type="date" id="inc-date" required class="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-theme-text text-xs font-bold outline-none focus:border-emerald-500 shadow-inner [color-scheme:dark]"/>
+                        <input type="date" id="inc-date" required class="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-theme-text text-xs font-bold outline-none focus:border-emerald-500 shadow-inner "/>
                     </div>
                     <div>
                         <label class="block text-[9px] font-black text-theme-muted mb-2 uppercase tracking-widest">Kategori</label>
@@ -837,7 +837,7 @@
                 </div>
                 <div>
                     <label class="block text-[9px] font-black text-theme-muted mb-2 uppercase tracking-widest">Tanggal</label>
-                    <input type="date" id="brankas-date" required class="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-theme-text text-xs font-bold outline-none focus:border-theme-accent shadow-inner [color-scheme:dark]"/>
+                    <input type="date" id="brankas-date" required class="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-theme-text text-xs font-bold outline-none focus:border-theme-accent shadow-inner "/>
                 </div>
                 <div>
                     <label class="block text-[9px] font-black text-theme-muted mb-2 uppercase tracking-widest">Nominal (Rp)</label>
