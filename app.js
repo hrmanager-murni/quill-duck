@@ -817,8 +817,12 @@ const renderCategories = () => {
     incList.innerHTML = ''; expList.innerHTML = '';
     
     categories.forEach(c => {
-        let delBtn = c.isSystem ? '' : `<button onclick="window.deleteCategory('${c.id}')" class="text-rose-500 hover:text-rose-400 p-1 bg-theme-card rounded"><i class="ph ph-trash"></i></button>`;
-        let lockIcon = c.isSystem ? `<i class="ph ph-lock-key text-theme-muted" title="Sistem (Tidak bisa dihapus)"></i>` : '';
+        // PERUBAHAN: Menambahkan tombol Edit (Pensil Kuning)
+        let actionBtns = c.isSystem ? '' : `
+            <button onclick="window.editCategory('${c.id}')" class="text-amber-500 hover:text-amber-400 p-1 bg-theme-card border border-theme-border rounded mr-1 shadow-sm transition-colors" title="Edit Kategori"><i class="ph ph-pencil-simple"></i></button>
+            <button onclick="window.deleteCategory('${c.id}')" class="text-rose-500 hover:text-rose-400 p-1 bg-theme-card border border-theme-border rounded shadow-sm transition-colors" title="Hapus Kategori"><i class="ph ph-trash"></i></button>
+        `;
+        let lockIcon = c.isSystem ? `<i class="ph ph-lock-key text-theme-muted" title="Sistem (Terkunci)"></i>` : '';
         
         let iconHtml = c.icon ? `<i class="ph ${c.icon} text-lg"></i>` : `<i class="ph ph-tag text-lg"></i>`;
         
@@ -828,7 +832,7 @@ const renderCategories = () => {
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm" style="background-color: ${c.color}">${iconHtml}</div>
                 <span class="text-xs font-bold text-theme-text uppercase tracking-widest">${c.name}</span>
             </div>
-            <div class="flex items-center space-x-2 opacity-100 sm:opacity-50 group-hover:opacity-100 transition-opacity">${lockIcon}${delBtn}</div>
+            <div class="flex items-center space-x-1 opacity-100 sm:opacity-50 group-hover:opacity-100 transition-opacity">${lockIcon}${actionBtns}</div>
         </div>`;
         if(c.type === 'income') incList.innerHTML += html; else expList.innerHTML += html;
     });
@@ -846,10 +850,35 @@ const updateCategoryDropdowns = () => {
 };
 
 window.openCategoryModal = (type) => {
-    document.getElementById('cat-type').value = type; document.getElementById('cat-modal-title').innerText = type === 'income' ? 'Tambah Kat. Pemasukan' : 'Tambah Kat. Pengeluaran';
-    document.getElementById('cat-name').value = ''; 
+    document.getElementById('cat-id').value = ''; 
+    document.getElementById('cat-type').value = type; 
+    document.getElementById('cat-modal-title').innerText = type === 'income' ? 'Tambah Kat. Pemasukan' : 'Tambah Kat. Pengeluaran';
+    
+    const nameInput = document.getElementById('cat-name');
+    nameInput.value = ''; 
+    nameInput.dataset.oldName = ''; // Reset memori nama lama
+    
     window.selectCatColor('#3b82f6'); 
-    window.selectCatIcon('ph-shopping-cart'); // Default ikon pertama kali dibuka
+    window.selectCatIcon('ph-shopping-cart'); 
+    document.getElementById('category-modal').classList.remove('hidden');
+};
+
+// FUNGSI BARU: Buka Modal dalam Mode Edit
+window.editCategory = (id) => {
+    const cat = categories.find(c => c.id === id);
+    if(!cat || cat.isSystem) return;
+    
+    document.getElementById('cat-id').value = cat.id;
+    document.getElementById('cat-type').value = cat.type;
+    document.getElementById('cat-modal-title').innerText = cat.type === 'income' ? 'Edit Kat. Pemasukan' : 'Edit Kat. Pengeluaran';
+    
+    const nameInput = document.getElementById('cat-name');
+    nameInput.value = cat.name;
+    nameInput.dataset.oldName = cat.name; // Simpan nama lama untuk auto-update
+    
+    window.selectCatColor(cat.color || '#3b82f6');
+    window.selectCatIcon(cat.icon || 'ph-tag');
+    
     document.getElementById('category-modal').classList.remove('hidden');
 };
 
@@ -878,20 +907,41 @@ window.selectCatColor = (color) => {
 };
 
 document.getElementById('category-form').addEventListener('submit', async (e) => {
-    e.preventDefault(); if(!isAuthReady) return; const btn = document.getElementById('btn-submit-cat'); const origText = btn.innerHTML; btn.innerText = "Simpan..."; btn.disabled = true;
+    e.preventDefault(); if(!isAuthReady) return; 
+    const btn = document.getElementById('btn-submit-cat'); const origText = btn.innerHTML; btn.innerText = "Menyimpan..."; btn.disabled = true;
+    
     try {
+        const id = document.getElementById('cat-id').value;
         const name = document.getElementById('cat-name').value;
-        if(categories.some(c => c.name.toLowerCase() === name.toLowerCase())) throw new Error("Nama kategori sudah ada!");
+        const oldName = document.getElementById('cat-name').dataset.oldName;
+        const type = document.getElementById('cat-type').value;
+        const color = document.getElementById('cat-color').value;
+        const icon = document.getElementById('cat-icon').value || 'ph-tag';
+
+        // Cek duplikat: Boleh pakai nama sama HANYA JIKA dia sedang mengedit kategori miliknya sendiri
+        if(!id || (id && name.toLowerCase() !== (oldName || '').toLowerCase())) {
+            if(categories.some(c => c.name.toLowerCase() === name.toLowerCase())) throw new Error("Nama kategori sudah digunakan!");
+        }
         
-        // Simpan Warna DAN Ikon ke Firebase
-        await addDoc(getPosCol("finance_categories"), { 
-            name: name, 
-            type: document.getElementById('cat-type').value, 
-            color: document.getElementById('cat-color').value,
-            icon: document.getElementById('cat-icon').value || 'ph-tag' 
-        });
+        if (id) {
+            // PROSES EDIT KATEGORI
+            await updateDoc(getPosDoc("finance_categories", id), { name, type, color, icon });
+            
+            // JIKA nama kategori diubah, update juga semua transaksi lama yang pakai nama ini!
+            if(name !== oldName && oldName) {
+                const mutsToUpdate = mutations.filter(m => m.category === oldName);
+                for(let m of mutsToUpdate) {
+                    await updateDoc(getPosDoc("finance_mutations", m.id), { category: name });
+                }
+            }
+            showToast("Kategori berhasil diperbarui", "success"); 
+        } else {
+            // PROSES TAMBAH KATEGORI
+            await addDoc(getPosCol("finance_categories"), { name, type, color, icon });
+            showToast("Kategori baru ditambahkan", "success"); 
+        }
         
-        showToast("Kategori ditambahkan", "success"); window.closeModal('category-modal');
+        window.closeModal('category-modal');
     } catch(e) { showToast(e.message, 'error'); } finally { btn.innerHTML = origText; btn.disabled = false; }
 });
 
