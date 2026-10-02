@@ -38,50 +38,75 @@
         <span id="toast-msg">Notifikasi</span>
     </div>
 
-    <!-- Sidebar Navigation (Desktop) -->
-    <nav class="w-full md:w-20 lg:w-64 bg-theme-card border-r border-theme-border flex-col justify-between hidden md:flex shrink-0 z-20">
+    <!-- Sidebar Navigation (Desktop) - Minimalist & Collapsible -->
+    <nav id="sidebar" class="w-full md:w-20 lg:w-64 bg-theme-card border-r border-theme-border flex-col justify-between hidden md:flex shrink-0 z-20 transition-all duration-300 relative group">
+        
+        <!-- Tombol Toggle (Panah) akan muncul saat mouse diarahkan ke sidebar -->
+        <button onclick="window.toggleSidebar()" class="absolute -right-3 top-8 w-6 h-6 bg-theme-accent text-slate-900 rounded-full flex items-center justify-center shadow-md z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+            <i id="sidebar-icon" class="ph ph-caret-left font-bold"></i>
+        </button>
+
         <div class="flex-1 overflow-y-auto no-scrollbar">
-            <div class="p-6 flex flex-col items-center justify-center border-b border-theme-border">
-                <div class="w-14 h-14 rounded-full bg-theme-bg border border-theme-accent flex items-center justify-center shadow-md mb-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class="w-8 h-8 text-theme-accent fill-current">
+            <div class="p-6 flex flex-col items-center justify-center border-b border-theme-border min-h-[130px]">
+                <div id="sidebar-logo" class="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-theme-bg border border-theme-accent flex items-center justify-center shadow-md mb-3 transition-all duration-300 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class="w-6 h-6 lg:w-8 lg:h-8 text-theme-accent fill-current transition-all">
                         <path d="M216,112.51V40a8,8,0,0,0-8-8H160a8,8,0,0,0-7.8,6.24L133.4,121.6A48.07,48.07,0,0,0,104,112H80a48.05,48.05,0,0,0-48,48v48a8,8,0,0,0,8,8H104a48.05,48.05,0,0,0,48-48V163l60.2,13.38A8,8,0,0,0,224,168.6V120A8,8,0,0,0,216,112.51ZM104,200H48V160a32,32,0,0,1,32-32h24a32,32,0,0,1,32,32v8A32,32,0,0,1,104,200Z"/>
                         <circle cx="84" cy="156" r="12"/><path d="M192,48h16V98.24L160,86ZM147.28,103,163.6,155.6l-24-5.33V140A8,8,0,0,1,147.28,103Z"/>
                     </svg>
                 </div>
-                <h1 class="font-serif font-black text-theme-accent text-lg tracking-wide hidden lg:block leading-tight text-center">QUILL-DUCK<br><span class="text-[10px] text-theme-text font-sans uppercase">Pawon Nusantara</span></h1>
-                <p class="text-[8px] text-theme-muted uppercase tracking-widest font-bold hidden lg:block mt-1">Finance System</p>
+                <div id="sidebar-brand" class="hidden lg:block text-center transition-all duration-300">
+                    <h1 class="font-serif font-black text-theme-accent text-lg tracking-wide leading-tight">QUILL-DUCK<br><span class="text-[10px] text-theme-text font-sans uppercase">Pawon Nusantara</span></h1>
+                    <p class="text-[8px] text-theme-muted uppercase tracking-widest font-bold mt-1">Finance System</p>
+                </div>
             </div>
             
-            <div class="p-4 space-y-2">
-                <button onclick="window.switchTab('dashboard')" id="btn-tab-dashboard" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg/50">
-                    <i class="ph ph-chart-pie-slice text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Dashboard</span>
+            <div class="p-3 space-y-1.5 mt-2">
+                <!-- Tab Buttons with Tooltips for collapsed mode -->
+                <button onclick="window.switchTab('dashboard')" id="btn-tab-dashboard" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg hover:text-theme-accent group/btn relative">
+                    <i class="ph ph-chart-pie-slice text-xl shrink-0"></i>
+                    <span class="sidebar-text hidden lg:block text-xs font-bold uppercase tracking-wider whitespace-nowrap">Dashboard</span>
+                    <div class="absolute left-14 bg-theme-card border border-theme-border text-theme-text text-[10px] font-bold px-3 py-1.5 rounded shadow-lg hidden group-hover/btn:block lg:group-hover/btn:hidden z-50 whitespace-nowrap">Dashboard</div>
                 </button>
-                <button onclick="window.switchTab('mutasi')" id="btn-tab-mutasi" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg/50">
-                    <i class="ph ph-swap text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Mutasi Kas</span>
+                <button onclick="window.switchTab('mutasi')" id="btn-tab-mutasi" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg hover:text-theme-accent group/btn relative">
+                    <i class="ph ph-swap text-xl shrink-0"></i>
+                    <span class="sidebar-text hidden lg:block text-xs font-bold uppercase tracking-wider whitespace-nowrap">Mutasi Kas</span>
+                    <div class="absolute left-14 bg-theme-card border border-theme-border text-theme-text text-[10px] font-bold px-3 py-1.5 rounded shadow-lg hidden group-hover/btn:block lg:group-hover/btn:hidden z-50 whitespace-nowrap">Mutasi Kas</div>
                 </button>
-                <button onclick="window.switchTab('brankas')" id="btn-tab-brankas" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg/50">
-                    <i class="ph ph-vault text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Brankas</span>
+                <button onclick="window.switchTab('brankas')" id="btn-tab-brankas" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg hover:text-theme-accent group/btn relative">
+                    <i class="ph ph-vault text-xl shrink-0"></i>
+                    <span class="sidebar-text hidden lg:block text-xs font-bold uppercase tracking-wider whitespace-nowrap">Brankas</span>
+                    <div class="absolute left-14 bg-theme-card border border-theme-border text-theme-text text-[10px] font-bold px-3 py-1.5 rounded shadow-lg hidden group-hover/btn:block lg:group-hover/btn:hidden z-50 whitespace-nowrap">Brankas</div>
                 </button>
-                <button onclick="window.switchTab('arsip')" id="btn-tab-arsip" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg/50">
-                    <i class="ph ph-books text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Tutup Buku</span>
+                <button onclick="window.switchTab('arsip')" id="btn-tab-arsip" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg hover:text-theme-accent group/btn relative">
+                    <i class="ph ph-books text-xl shrink-0"></i>
+                    <span class="sidebar-text hidden lg:block text-xs font-bold uppercase tracking-wider whitespace-nowrap">Tutup Buku</span>
+                    <div class="absolute left-14 bg-theme-card border border-theme-border text-theme-text text-[10px] font-bold px-3 py-1.5 rounded shadow-lg hidden group-hover/btn:block lg:group-hover/btn:hidden z-50 whitespace-nowrap">Tutup Buku</div>
                 </button>
-                <button onclick="window.switchTab('library')" id="btn-tab-library" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg/50">
-                    <i class="ph ph-archive text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Library</span>
+                <button onclick="window.switchTab('library')" id="btn-tab-library" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg hover:text-theme-accent group/btn relative">
+                    <i class="ph ph-archive text-xl shrink-0"></i>
+                    <span class="sidebar-text hidden lg:block text-xs font-bold uppercase tracking-wider whitespace-nowrap">Library</span>
+                    <div class="absolute left-14 bg-theme-card border border-theme-border text-theme-text text-[10px] font-bold px-3 py-1.5 rounded shadow-lg hidden group-hover/btn:block lg:group-hover/btn:hidden z-50 whitespace-nowrap">Library</div>
                 </button>
                 
                 <div class="py-2"><hr class="border-theme-border"></div>
 
-                <button onclick="window.switchTab('kategori')" id="btn-tab-kategori" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg/50">
-                    <i class="ph ph-gear text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Pengaturan</span>
+                <button onclick="window.switchTab('kategori')" id="btn-tab-kategori" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg hover:text-theme-accent group/btn relative">
+                    <i class="ph ph-gear text-xl shrink-0"></i>
+                    <span class="sidebar-text hidden lg:block text-xs font-bold uppercase tracking-wider whitespace-nowrap">Pengaturan</span>
+                    <div class="absolute left-14 bg-theme-card border border-theme-border text-theme-text text-[10px] font-bold px-3 py-1.5 rounded shadow-lg hidden group-hover/btn:block lg:group-hover/btn:hidden z-50 whitespace-nowrap">Pengaturan</div>
                 </button>
-                <button onclick="window.switchTab('sampah')" id="btn-tab-sampah" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg/50">
-                    <i class="ph ph-trash text-xl"></i><span class="hidden lg:block text-xs font-bold uppercase tracking-wider">Sampah</span>
+                <button onclick="window.switchTab('sampah')" id="btn-tab-sampah" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl transition-all text-theme-muted hover:bg-theme-bg hover:text-theme-accent group/btn relative">
+                    <i class="ph ph-trash text-xl shrink-0"></i>
+                    <span class="sidebar-text hidden lg:block text-xs font-bold uppercase tracking-wider whitespace-nowrap">Sampah</span>
+                    <div class="absolute left-14 bg-theme-card border border-theme-border text-theme-text text-[10px] font-bold px-3 py-1.5 rounded shadow-lg hidden group-hover/btn:block lg:group-hover/btn:hidden z-50 whitespace-nowrap">Sampah</div>
                 </button>
             </div>
         </div>
-        <div class="p-4 border-t border-theme-border shrink-0">
-            <button onclick="window.toggleTheme()" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl bg-theme-bg text-theme-text border border-theme-border hover:border-theme-accent transition-colors shadow-sm">
-                <i class="ph ph-palette text-lg text-theme-accent"></i><span id="theme-text-desktop" class="hidden lg:block text-[10px] font-black uppercase tracking-widest">Ubah ke Soft Mode</span>
+        <div class="p-3 border-t border-theme-border shrink-0">
+            <button onclick="window.toggleTheme()" class="w-full flex items-center justify-center lg:justify-start space-x-3 px-4 py-3 rounded-xl text-theme-muted hover:bg-theme-bg hover:text-theme-accent transition-colors group/btn relative">
+                <i class="ph ph-palette text-xl shrink-0"></i>
+                <span id="theme-text-desktop" class="sidebar-text hidden lg:block text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Ubah ke Soft Mode</span>
+                <div class="absolute left-14 bg-theme-card border border-theme-border text-theme-text text-[10px] font-bold px-3 py-1.5 rounded shadow-lg hidden group-hover/btn:block lg:group-hover/btn:hidden z-50 whitespace-nowrap">Ubah Tema</div>
             </button>
         </div>
     </nav>
@@ -140,68 +165,112 @@
             
             <!-- TAB: DASHBOARD -->
             <div id="tab-dashboard" class="tab-content max-w-7xl mx-auto space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-theme-card p-4 sm:p-5 rounded-3xl border border-theme-border shadow-sm">
-                    <div>
-                        <h3 class="text-sm font-black text-theme-text uppercase tracking-widest flex items-center"><i class="ph ph-calendar-blank text-theme-accent mr-2 text-lg"></i> Periode Dashboard</h3>
-                        <p class="text-[9px] font-bold text-theme-muted uppercase tracking-widest mt-1">Laporan disajikan sesuai tanggal</p>
+                
+                <!-- Filter Panel Modern -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 bg-theme-card p-5 sm:px-6 rounded-2xl border border-theme-border shadow-sm transition-all hover:shadow-md">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-2xl bg-theme-accent/10 flex items-center justify-center text-theme-accent shrink-0">
+                            <i class="ph ph-calendar-check text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-theme-text">Periode Dasbor</h3>
+                            <p class="text-xs font-medium text-theme-muted mt-0.5">Analisa data berdasarkan rentang waktu</p>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-2 bg-theme-bg p-1.5 rounded-xl border border-theme-border w-full sm:w-auto">
-                        <input type="date" id="dash-start" class="bg-transparent text-theme-text text-[10px] sm:text-xs font-bold outline-none cursor-pointer px-2">
-                        <span class="text-theme-muted">-</span>
-                        <input type="date" id="dash-end" class="bg-transparent text-theme-text text-[10px] sm:text-xs font-bold outline-none cursor-pointer px-2">
-                        <button onclick="window.applyDashboardFilter()" class="px-3 py-1.5 bg-theme-accent text-slate-900 rounded-lg text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-opacity ml-2">Filter</button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    <div class="glass-card p-6 flex flex-col justify-center relative overflow-hidden group">
-                        <div class="absolute -right-4 -bottom-4 text-emerald-500/10 text-7xl group-hover:scale-110 transition-transform"><i class="ph ph-trend-up"></i></div>
-                        <p class="text-[10px] font-black text-theme-muted mb-2 uppercase tracking-widest relative z-10">Total Pemasukan</p>
-                        <h3 id="dash-tot-in" class="text-xl sm:text-2xl font-black text-emerald-500 relative z-10 drop-shadow-sm pb-1 leading-tight overflow-visible">Rp 0</h3>
-                    </div>
-                    <div class="glass-card p-6 flex flex-col justify-center relative overflow-hidden group">
-                        <div class="absolute -right-4 -bottom-4 text-rose-500/10 text-7xl group-hover:scale-110 transition-transform"><i class="ph ph-trend-down"></i></div>
-                        <p class="text-[10px] font-black text-theme-muted mb-2 uppercase tracking-widest relative z-10">Total Pengeluaran</p>
-                        <h3 id="dash-tot-out" class="text-xl sm:text-2xl font-black text-rose-500 relative z-10 drop-shadow-sm pb-1 leading-tight overflow-visible">Rp 0</h3>
-                    </div>
-                    <div class="glass-card p-6 flex flex-col justify-center relative overflow-hidden bg-theme-accent/5 border-theme-accent/30 group">
-                        <div class="absolute -right-4 -bottom-4 text-theme-accent/10 text-7xl group-hover:scale-110 transition-transform"><i class="ph ph-scales"></i></div>
-                        <p class="text-[10px] font-black text-theme-muted mb-2 uppercase tracking-widest relative z-10">Laba Bersih Operasional</p>
-                        <h3 id="dash-net" class="text-xl sm:text-2xl font-black text-theme-accent relative z-10 drop-shadow-sm pb-1 leading-tight overflow-visible">Rp 0</h3>
-                    </div>
-                    <div class="glass-card p-6 flex flex-col justify-center relative overflow-hidden bg-slate-800/10 border-slate-500/30 group">
-                        <div class="absolute -right-4 -bottom-4 text-slate-500/10 text-7xl group-hover:scale-110 transition-transform"><i class="ph ph-vault"></i></div>
-                        <p class="text-[10px] font-black text-theme-muted mb-2 uppercase tracking-widest relative z-10">Total Saldo Brankas</p>
-                        <h3 id="dash-brankas" class="text-xl sm:text-2xl font-black text-slate-400 relative z-10 drop-shadow-sm pb-1 leading-tight overflow-visible">Rp 0</h3>
+                    <div class="flex items-center bg-theme-bg p-1.5 rounded-xl border border-theme-border w-full sm:w-auto shadow-inner">
+                        <input type="date" id="dash-start" class="bg-transparent text-theme-text text-sm font-semibold outline-none cursor-pointer px-3 w-full sm:w-auto">
+                        <span class="text-theme-muted mx-1">
+                            <i class="ph ph-arrow-right"></i>
+                        </span>
+                        <input type="date" id="dash-end" class="bg-transparent text-theme-text text-sm font-semibold outline-none cursor-pointer px-3 w-full sm:w-auto">
+                        <button onclick="window.applyDashboardFilter()" class="px-5 py-2.5 bg-theme-accent text-slate-900 rounded-lg text-xs font-bold tracking-wide hover:scale-105 transition-transform ml-2 shadow-sm whitespace-nowrap">
+                            Terapkan
+                        </button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                    <div class="glass-card p-4 sm:p-6 flex flex-col h-[400px]">
-                        <h3 class="text-xs font-black text-theme-text mb-4 uppercase tracking-widest border-b border-theme-border pb-3 flex items-center shrink-0"><i class="ph ph-chart-line-up text-emerald-500 mr-2 text-lg"></i> Tren Pemasukan</h3>
+                <!-- KPI Cards Modern -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <!-- Card Pemasukan -->
+                    <div class="bg-theme-card p-5 rounded-2xl border border-theme-border hover:border-emerald-500/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between h-32">
+                        <div class="flex justify-between items-start">
+                            <p class="text-sm font-medium text-theme-muted group-hover:text-theme-text transition-colors">Total Pemasukan</p>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                                <i class="ph ph-trend-up text-xl"></i>
+                            </div>
+                        </div>
+                        <h3 id="dash-tot-in" class="text-2xl font-bold text-emerald-500 tracking-tight truncate">Rp 0</h3>
+                    </div>
+                    
+                    <!-- Card Pengeluaran -->
+                    <div class="bg-theme-card p-5 rounded-2xl border border-theme-border hover:border-rose-500/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between h-32">
+                        <div class="flex justify-between items-start">
+                            <p class="text-sm font-medium text-theme-muted group-hover:text-theme-text transition-colors">Total Pengeluaran</p>
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform">
+                                <i class="ph ph-trend-down text-xl"></i>
+                            </div>
+                        </div>
+                        <h3 id="dash-tot-out" class="text-2xl font-bold text-rose-500 tracking-tight truncate">Rp 0</h3>
+                    </div>
+                    
+                    <!-- Card Laba Bersih -->
+                    <div class="bg-gradient-to-br from-theme-card to-theme-accent/5 p-5 rounded-2xl border border-theme-accent/30 hover:shadow-xl hover:shadow-theme-accent/10 hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 text-theme-accent/5 text-7xl transform -rotate-12 pointer-events-none"><i class="ph ph-scales"></i></div>
+                        <div class="flex justify-between items-start relative z-10">
+                            <p class="text-sm font-medium text-theme-text">Laba Bersih Operasional</p>
+                            <div class="w-10 h-10 rounded-xl bg-theme-accent text-slate-900 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                <i class="ph ph-scales text-xl font-bold"></i>
+                            </div>
+                        </div>
+                        <h3 id="dash-net" class="text-2xl font-bold text-theme-accent tracking-tight truncate relative z-10">Rp 0</h3>
+                    </div>
+                    
+                    <!-- Card Brankas -->
+                    <div class="bg-theme-card p-5 rounded-2xl border border-theme-border hover:border-blue-500/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between h-32">
+                        <div class="flex justify-between items-start">
+                            <p class="text-sm font-medium text-theme-muted group-hover:text-theme-text transition-colors">Total Saldo Brankas</p>
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+                                <i class="ph ph-vault text-xl"></i>
+                            </div>
+                        </div>
+                        <h3 id="dash-brankas" class="text-2xl font-bold text-blue-500 tracking-tight truncate">Rp 0</h3>
+                    </div>
+
+                </div>
+
+                <!-- Charts Section Modern -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+                    <div class="bg-theme-card p-5 sm:p-6 rounded-2xl border border-theme-border shadow-sm flex flex-col h-[420px] transition-all hover:shadow-md">
+                        <div class="flex items-center space-x-3 mb-6 pb-4 border-b border-theme-border/50 shrink-0">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500"><i class="ph ph-chart-line-up text-lg"></i></div>
+                            <h3 class="text-sm font-bold text-theme-text">Tren Pemasukan vs Pengeluaran</h3>
+                        </div>
                         <div class="flex-1 w-full min-h-0 relative"><canvas id="chart-income"></canvas></div>
                     </div>
-                    <div class="glass-card p-4 sm:p-6 flex flex-col h-[400px]">
-                        <h3 class="text-xs font-black text-theme-text mb-4 uppercase tracking-widest border-b border-theme-border pb-3 flex items-center justify-between shrink-0">
-                            <span class="flex items-center"><i class="ph ph-pie-chart text-rose-500 mr-2 text-lg"></i> Porsi Pengeluaran</span>
-                        </h3>
-                        <div class="flex-1 w-full flex flex-col min-h-0">
-                            <div class="flex-1 w-full min-h-0 relative">
-                                <canvas id="chart-expense"></canvas>
-                                <div id="empty-expense-chart" class="absolute inset-0 flex flex-col items-center justify-center bg-theme-card/80 backdrop-blur-sm z-10 hidden">
-                                    <i class="ph ph-receipt text-3xl text-theme-muted opacity-50 mb-2"></i>
-                                    <p class="text-[10px] font-bold text-theme-muted uppercase tracking-widest">Belum ada pengeluaran</p>
-                                </div>
+                    <div class="bg-theme-card p-5 sm:p-6 rounded-2xl border border-theme-border shadow-sm flex flex-col h-[420px] transition-all hover:shadow-md">
+                        <div class="flex items-center space-x-3 mb-6 pb-4 border-b border-theme-border/50 shrink-0">
+                            <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500"><i class="ph ph-pie-chart text-lg"></i></div>
+                            <h3 class="text-sm font-bold text-theme-text">Proporsi Pengeluaran Operasional</h3>
+                        </div>
+                        <div class="flex-1 w-full flex flex-col min-h-0 relative">
+                            <canvas id="chart-expense"></canvas>
+                            <div id="empty-expense-chart" class="absolute inset-0 flex flex-col items-center justify-center bg-theme-card/90 backdrop-blur-sm z-10 rounded-xl hidden">
+                                <div class="w-16 h-16 rounded-full bg-theme-bg flex items-center justify-center text-theme-muted mb-3"><i class="ph ph-receipt text-3xl"></i></div>
+                                <p class="text-sm font-medium text-theme-muted">Belum ada pengeluaran</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass-card p-4 sm:p-6 mt-4 sm:mt-6">
-                    <h3 class="text-xs font-black text-theme-text mb-4 uppercase tracking-widest border-b border-theme-border pb-3 flex items-center shrink-0">
-                        <i class="ph ph-list-numbers text-rose-500 mr-2 text-lg"></i> Rincian Pengeluaran per Kategori
-                    </h3>
-                    <div id="dash-category-details" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Detail Pengeluaran Modern -->
+                <div class="bg-theme-card p-5 sm:p-6 rounded-2xl border border-theme-border shadow-sm transition-all hover:shadow-md mt-4 sm:mt-6">
+                    <div class="flex items-center space-x-3 mb-6 pb-4 border-b border-theme-border/50 shrink-0">
+                        <div class="w-8 h-8 rounded-lg bg-theme-accent/10 flex items-center justify-center text-theme-accent"><i class="ph ph-list-numbers text-lg"></i></div>
+                        <h3 class="text-sm font-bold text-theme-text">Rincian Top Pengeluaran Per Kategori</h3>
+                    </div>
+                    <div id="dash-category-details" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <!-- Data dikirim dari app.js -->
                     </div>
                 </div>
             </div>
