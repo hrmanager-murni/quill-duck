@@ -204,12 +204,15 @@ async function initAuth() {
             categories = []; 
             let sysNames = ['Setoran', 'Pindah ke Brankas', 'Cairkan dari Brankas'];
             const sysColors = { 'Setoran': '#10b981', 'Pindah ke Brankas': '#f59e0b', 'Cairkan dari Brankas': '#3b82f6' };
+            const sysIcons = { 'Setoran': 'ph-download-simple', 'Pindah ke Brankas': 'ph-vault', 'Cairkan dari Brankas': 'ph-upload-simple' };
 
             snap.forEach(d => { const data = d.data(); if(!sysNames.includes(data.name)) categories.push({ id: d.id, ...data }); });
             sysNames.forEach(name => categories.push({ 
                 id: 'sys_'+name, name: name, 
                 type: name==='Setoran'||name==='Cairkan dari Brankas'?'income':'expense', 
-                color: sysColors[name] || '#64748b', isSystem: true 
+                color: sysColors[name] || '#64748b', 
+                icon: sysIcons[name] || 'ph-tag', // Setel ikon sistem otomatis
+                isSystem: true 
             }));
             renderCategories(); updateCategoryDropdowns();
         });
@@ -501,7 +504,10 @@ const renderMutasiTable = (containerId, data, type) => {
                 
                 <div class="flex justify-between items-start mb-3 relative z-10">
                     <div class="flex items-center">
-                        <span class="w-3 h-3 rounded-full mr-2.5 shadow-sm" style="background-color: ${color}"></span>
+                        <!-- Mengganti titik warna dengan kotak ikon elegan -->
+                        <div class="w-7 h-7 rounded-lg flex items-center justify-center mr-2.5 shadow-sm text-white" style="background-color: ${color}">
+                            <i class="ph ${catObj && catObj.icon ? catObj.icon : 'ph-tag'} text-sm font-bold drop-shadow-sm"></i>
+                        </div>
                         <span class="text-xs font-bold uppercase tracking-wider text-theme-text">${m.category}</span>
                         ${archiveTag}
                     </div>
@@ -811,9 +817,19 @@ const renderCategories = () => {
     incList.innerHTML = ''; expList.innerHTML = '';
     
     categories.forEach(c => {
-        let delBtn = c.isSystem ? '' : `<button onclick="window.deleteCategory('${c.id}')" class="text-rose-500 hover:text-rose-400"><i class="ph ph-trash"></i></button>`;
+        let delBtn = c.isSystem ? '' : `<button onclick="window.deleteCategory('${c.id}')" class="text-rose-500 hover:text-rose-400 p-1 bg-theme-card rounded"><i class="ph ph-trash"></i></button>`;
         let lockIcon = c.isSystem ? `<i class="ph ph-lock-key text-theme-muted" title="Sistem (Tidak bisa dihapus)"></i>` : '';
-        const html = `<div class="flex items-center justify-between p-3 bg-theme-bg border border-theme-border rounded-xl shadow-sm"><div class="flex items-center space-x-3"><span class="w-3 h-3 rounded-full shadow-sm" style="background-color: ${c.color}"></span><span class="text-xs font-black text-theme-text uppercase tracking-widest">${c.name}</span></div><div class="flex space-x-2">${lockIcon}${delBtn}</div></div>`;
+        
+        let iconHtml = c.icon ? `<i class="ph ${c.icon} text-lg"></i>` : `<i class="ph ph-tag text-lg"></i>`;
+        
+        const html = `
+        <div class="flex items-center justify-between p-3 bg-theme-bg border border-theme-border rounded-xl shadow-sm group hover:border-theme-accent/50 transition-colors">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm" style="background-color: ${c.color}">${iconHtml}</div>
+                <span class="text-xs font-bold text-theme-text uppercase tracking-widest">${c.name}</span>
+            </div>
+            <div class="flex items-center space-x-2 opacity-100 sm:opacity-50 group-hover:opacity-100 transition-opacity">${lockIcon}${delBtn}</div>
+        </div>`;
         if(c.type === 'income') incList.innerHTML += html; else expList.innerHTML += html;
     });
 };
@@ -831,7 +847,22 @@ const updateCategoryDropdowns = () => {
 
 window.openCategoryModal = (type) => {
     document.getElementById('cat-type').value = type; document.getElementById('cat-modal-title').innerText = type === 'income' ? 'Tambah Kat. Pemasukan' : 'Tambah Kat. Pengeluaran';
-    document.getElementById('cat-name').value = ''; window.selectCatColor('#3b82f6'); document.getElementById('category-modal').classList.remove('hidden');
+    document.getElementById('cat-name').value = ''; 
+    window.selectCatColor('#3b82f6'); 
+    window.selectCatIcon('ph-shopping-cart'); // Default ikon pertama kali dibuka
+    document.getElementById('category-modal').classList.remove('hidden');
+};
+
+window.selectCatIcon = (iconClass) => {
+    document.getElementById('cat-icon').value = iconClass;
+    document.querySelectorAll('.icon-option').forEach(el => {
+        el.classList.remove('border-theme-accent', 'text-theme-accent', 'bg-theme-accent/10');
+        el.classList.add('border-theme-border', 'text-theme-muted');
+        if(el.dataset.icon === iconClass) {
+            el.classList.remove('border-theme-border', 'text-theme-muted');
+            el.classList.add('border-theme-accent', 'text-theme-accent', 'bg-theme-accent/10');
+        }
+    });
 };
 
 window.selectCatColor = (color) => {
@@ -851,7 +882,15 @@ document.getElementById('category-form').addEventListener('submit', async (e) =>
     try {
         const name = document.getElementById('cat-name').value;
         if(categories.some(c => c.name.toLowerCase() === name.toLowerCase())) throw new Error("Nama kategori sudah ada!");
-        await addDoc(getPosCol("finance_categories"), { name: name, type: document.getElementById('cat-type').value, color: document.getElementById('cat-color').value });
+        
+        // Simpan Warna DAN Ikon ke Firebase
+        await addDoc(getPosCol("finance_categories"), { 
+            name: name, 
+            type: document.getElementById('cat-type').value, 
+            color: document.getElementById('cat-color').value,
+            icon: document.getElementById('cat-icon').value || 'ph-tag' 
+        });
+        
         showToast("Kategori ditambahkan", "success"); window.closeModal('category-modal');
     } catch(e) { showToast(e.message, 'error'); } finally { btn.innerHTML = origText; btn.disabled = false; }
 });
