@@ -276,30 +276,42 @@
             </div>
 
             <!-- TAB: MUTASI KAS -->
-            <div id="tab-mutasi" class="tab-content max-w-7xl mx-auto space-y-6">
-                <div class="glass-card p-4 sm:p-5 flex items-center justify-between bg-gradient-to-r from-theme-card to-theme-bg relative overflow-hidden shadow-md border border-theme-accent/20">
-                    <div class="z-10">
-                        <div class="flex items-center space-x-2 mb-1">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <p class="text-[9px] font-black text-theme-muted tracking-widest uppercase">Saldo Kas Operasional (Berputar)</p>
+            <div id="tab-mutasi" class="tab-content max-w-7xl mx-auto space-y-6 hidden">
+                
+                <!-- Banner Saldo Operasional Minimalis -->
+                <div class="bg-gradient-to-br from-theme-card to-emerald-500/5 p-6 sm:p-8 rounded-3xl border border-emerald-500/20 relative overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 transition-all hover:shadow-md">
+                    <div class="z-10 w-full text-center md:text-left">
+                        <div class="flex items-center justify-center md:justify-start space-x-2 mb-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <p class="text-xs font-bold text-theme-muted tracking-wide">Saldo Kas Operasional (Berputar)</p>
                         </div>
-                        <h2 id="total-kas-display" class="text-3xl sm:text-4xl font-black text-theme-accent font-serif tracking-tighter drop-shadow-md pb-1 leading-tight overflow-visible">Rp 0</h2>
+                        <h2 id="total-kas-display" class="text-4xl sm:text-5xl font-black text-theme-accent font-serif tracking-tight drop-shadow-sm pb-1">Rp 0</h2>
                     </div>
-                    <i class="ph ph-wallet text-6xl sm:text-[80px] text-theme-accent opacity-5 absolute -right-4 -bottom-4 transform -rotate-12 z-0 pointer-events-none"></i>
+                    <div class="z-10 shrink-0 w-full md:w-auto flex justify-center md:justify-end">
+                        <div class="w-16 h-16 rounded-2xl bg-theme-accent/10 flex items-center justify-center text-theme-accent shadow-sm">
+                            <i class="ph ph-wallet text-4xl"></i>
+                        </div>
+                    </div>
+                    <i class="ph ph-wallet text-[120px] text-theme-accent opacity-5 absolute -right-4 -bottom-10 transform -rotate-12 pointer-events-none"></i>
                 </div>
 
                 <div id="pos-revisions-container" class="space-y-3 mb-4"></div>
 
-                <div class="glass-card overflow-hidden shadow-sm mb-4">
-                    <div class="p-4 border-b border-theme-border bg-theme-bg/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20"><i class="ph ph-download-simple text-lg"></i></div>
+                <!-- Konfirmasi Setoran Kasir Minimalis -->
+                <div class="bg-theme-card rounded-2xl border border-theme-border overflow-hidden shadow-sm transition-all hover:shadow-md mb-4">
+                    <div class="p-5 border-b border-theme-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
+                                <i class="ph ph-download-simple text-xl"></i>
+                            </div>
                             <div>
-                                <h3 class="text-xs sm:text-sm font-black text-theme-text uppercase tracking-widest">Menunggu Konfirmasi Setoran</h3>
-                                <p class="text-[9px] text-theme-muted font-bold mt-0.5">Setoran belum masuk kas jika belum diterima.</p>
+                                <h3 class="text-sm font-bold text-theme-text">Menunggu Konfirmasi Setoran POS</h3>
+                                <p class="text-[10px] text-theme-muted font-medium mt-0.5">Uang kasir baru akan masuk ke saldo jika diterima.</p>
                             </div>
                         </div>
-                        <button onclick="window.fetchRawTransactionsForSetoran()" class="px-3 py-1.5 bg-theme-bg border border-theme-border hover:border-theme-accent text-theme-text rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shadow-sm flex items-center"><i class="ph ph-arrows-clockwise mr-1"></i> Tarik Data POS Lama</button>
+                        <button onclick="window.fetchRawTransactionsForSetoran()" class="px-5 py-2.5 bg-theme-bg border border-theme-border hover:border-theme-accent text-theme-text rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-sm flex items-center hover:scale-105">
+                            <i class="ph ph-arrows-clockwise mr-2 text-sm"></i> Tarik Data Lama
+                        </button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs whitespace-nowrap">
@@ -308,50 +320,84 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start">
+                <!-- Panel Mutasi (Masuk & Keluar) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-start">
+                    
                     <!-- Panel Pemasukan -->
-                    <div class="glass-card flex flex-col h-[600px]">
-                        <div class="p-4 border-b border-theme-border bg-theme-bg/50 flex justify-between items-center shrink-0">
-                            <div class="flex items-center space-x-2">
-                                <i class="ph ph-arrow-down-left text-emerald-500 text-lg"></i>
-                                <h3 class="text-xs font-black text-theme-text uppercase tracking-widest">Data Pemasukan</h3>
+                    <div class="bg-theme-card rounded-2xl border border-theme-border shadow-sm flex flex-col h-[700px] transition-all hover:shadow-md overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-5 border-b border-theme-border flex justify-between items-center bg-emerald-500/5">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
+                                    <i class="ph ph-arrow-down-left text-xl font-bold"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-bold text-theme-text">Data Pemasukan</h3>
+                                    <p class="text-[10px] font-medium text-theme-muted">Riwayat dana masuk</p>
+                                </div>
                             </div>
-                            <button onclick="window.openIncomeModal()" class="w-8 h-8 bg-emerald-500 text-slate-900 rounded-xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform"><i class="ph ph-plus font-bold"></i></button>
+                            <button onclick="window.openIncomeModal()" class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-md hover:scale-105 hover:bg-emerald-600 transition-all shrink-0">
+                                <i class="ph ph-plus font-bold text-lg"></i>
+                            </button>
                         </div>
-                        <div class="p-3 border-b border-theme-border bg-theme-card flex flex-col sm:flex-row justify-between gap-2 shrink-0">
-                            <select id="filter-income-cat" onchange="window.filterMutasiTables()" class="bg-theme-bg border border-theme-border text-theme-text text-[10px] font-black uppercase tracking-widest rounded-lg px-3 py-2 outline-none shadow-sm flex-1 focus:border-emerald-500">
-                                <option value="ALL">Semua Kategori</option>
-                            </select>
-                            <div class="flex items-center space-x-2 w-full sm:w-auto">
-                                <input type="date" id="filter-income-date" onchange="window.filterMutasiTables()" class="bg-theme-bg border border-theme-border text-theme-text text-[10px] font-black uppercase tracking-widest rounded-lg px-3 py-2 outline-none shadow-sm flex-1 focus:border-emerald-500">
-                                <button onclick="document.getElementById('filter-income-date').value=''; window.filterMutasiTables()" class="px-2 py-2 bg-theme-bg border border-theme-border rounded-lg text-theme-muted hover:text-rose-500"><i class="ph ph-x"></i></button>
+                        <!-- Filters & Search -->
+                        <div class="p-4 border-b border-theme-border bg-theme-bg flex flex-col gap-3 shrink-0">
+                            <!-- Input Pencarian Baru -->
+                            <div class="relative w-full">
+                                <i class="ph ph-magnifying-glass absolute left-3 top-3.5 text-theme-muted text-lg"></i>
+                                <input type="text" id="filter-income-search" onkeyup="window.filterMutasiTables()" placeholder="Cari keterangan pemasukan..." class="w-full bg-theme-card border border-theme-border rounded-xl pl-10 pr-4 py-3 text-xs font-semibold text-theme-text outline-none focus:border-emerald-500 transition-colors shadow-inner">
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <select id="filter-income-cat" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border text-theme-text text-xs font-semibold rounded-xl px-3 py-3 outline-none flex-1 focus:border-emerald-500 shadow-inner">
+                                    <option value="ALL">Semua Kategori</option>
+                                </select>
+                                <div class="flex items-center space-x-2 flex-1 relative">
+                                    <input type="date" id="filter-income-date" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border text-theme-text text-xs font-semibold rounded-xl px-3 py-3 outline-none w-full focus:border-emerald-500 shadow-inner [color-scheme:dark]">
+                                    <button onclick="document.getElementById('filter-income-date').value=''; window.filterMutasiTables()" class="absolute right-2 top-2 w-8 h-8 bg-theme-bg rounded-lg flex items-center justify-center text-theme-muted hover:text-rose-500 hover:bg-theme-card transition-colors"><i class="ph ph-x"></i></button>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex-1 overflow-y-auto no-scrollbar p-2" id="income-list"></div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4 bg-theme-bg/50" id="income-list"></div>
                     </div>
 
                     <!-- Panel Pengeluaran -->
-                    <div class="glass-card flex flex-col h-[600px]">
-                        <div class="p-4 border-b border-theme-border bg-theme-bg/50 flex justify-between items-center shrink-0">
-                            <div class="flex items-center space-x-2">
-                                <i class="ph ph-arrow-up-right text-rose-500 text-lg"></i>
-                                <h3 class="text-xs font-black text-theme-text uppercase tracking-widest">Data Pengeluaran</h3>
+                    <div class="bg-theme-card rounded-2xl border border-theme-border shadow-sm flex flex-col h-[700px] transition-all hover:shadow-md overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-5 border-b border-theme-border flex justify-between items-center bg-rose-500/5">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
+                                    <i class="ph ph-arrow-up-right text-xl font-bold"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-bold text-theme-text">Data Pengeluaran</h3>
+                                    <p class="text-[10px] font-medium text-theme-muted">Riwayat dana keluar</p>
+                                </div>
                             </div>
-                            <button onclick="window.openExpenseModal()" class="w-8 h-8 bg-rose-500 text-white rounded-xl flex items-center justify-center shadow-sm hover:scale-105 transition-transform"><i class="ph ph-plus font-bold"></i></button>
+                            <button onclick="window.openExpenseModal()" class="w-10 h-10 bg-rose-500 text-white rounded-xl flex items-center justify-center shadow-md hover:scale-105 hover:bg-rose-600 transition-all shrink-0">
+                                <i class="ph ph-plus font-bold text-lg"></i>
+                            </button>
                         </div>
-                        <div class="p-3 border-b border-theme-border bg-theme-card flex flex-col sm:flex-row justify-between gap-2 shrink-0">
-                            <select id="filter-expense-cat" onchange="window.filterMutasiTables()" class="bg-theme-bg border border-theme-border text-theme-text text-[10px] font-black uppercase tracking-widest rounded-lg px-3 py-2 outline-none shadow-sm flex-1 focus:border-rose-500">
-                                <option value="ALL">Semua Kategori</option>
-                            </select>
-                            <div class="flex items-center space-x-2 w-full sm:w-auto">
-                                <input type="date" id="filter-expense-date" onchange="window.filterMutasiTables()" class="bg-theme-bg border border-theme-border text-theme-text text-[10px] font-black uppercase tracking-widest rounded-lg px-3 py-2 outline-none shadow-sm flex-1 focus:border-rose-500">
-                                <button onclick="document.getElementById('filter-expense-date').value=''; window.filterMutasiTables()" class="px-2 py-2 bg-theme-bg border border-theme-border rounded-lg text-theme-muted hover:text-rose-500"><i class="ph ph-x"></i></button>
+                        <!-- Filters & Search -->
+                        <div class="p-4 border-b border-theme-border bg-theme-bg flex flex-col gap-3 shrink-0">
+                            <!-- Input Pencarian Baru (Bisa mencari ke dalam nota) -->
+                            <div class="relative w-full">
+                                <i class="ph ph-magnifying-glass absolute left-3 top-3.5 text-theme-muted text-lg"></i>
+                                <input type="text" id="filter-expense-search" onkeyup="window.filterMutasiTables()" placeholder="Cari nama barang, belanja, nota..." class="w-full bg-theme-card border border-theme-border rounded-xl pl-10 pr-4 py-3 text-xs font-semibold text-theme-text outline-none focus:border-rose-500 transition-colors shadow-inner">
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <select id="filter-expense-cat" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border text-theme-text text-xs font-semibold rounded-xl px-3 py-3 outline-none flex-1 focus:border-rose-500 shadow-inner">
+                                    <option value="ALL">Semua Kategori</option>
+                                </select>
+                                <div class="flex items-center space-x-2 flex-1 relative">
+                                    <input type="date" id="filter-expense-date" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border text-theme-text text-xs font-semibold rounded-xl px-3 py-3 outline-none w-full focus:border-rose-500 shadow-inner [color-scheme:dark]">
+                                    <button onclick="document.getElementById('filter-expense-date').value=''; window.filterMutasiTables()" class="absolute right-2 top-2 w-8 h-8 bg-theme-bg rounded-lg flex items-center justify-center text-theme-muted hover:text-rose-500 hover:bg-theme-card transition-colors"><i class="ph ph-x"></i></button>
+                                </div>
                             </div>
                         </div>
-                        <div class="bg-theme-bg py-1.5 px-3 flex justify-center items-center shrink-0 border-b border-theme-border">
-                            <span class="text-[8px] font-bold text-theme-muted"><i class="ph ph-info mr-1"></i> Data yang sudah Tutup Buku hanya bisa dilihat di tab Library.</span>
+                        <div class="bg-theme-bg py-2 px-4 flex justify-center items-center shrink-0 border-b border-theme-border text-center">
+                            <span class="text-[9px] font-medium text-theme-muted"><i class="ph ph-info mr-1"></i> Transaksi yang sudah Tutup Buku ada di tab Library.</span>
                         </div>
-                        <div class="flex-1 overflow-y-auto no-scrollbar p-2" id="expense-list"></div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4 bg-theme-bg/50" id="expense-list"></div>
                     </div>
                 </div>
             </div>
@@ -850,6 +896,21 @@
                     <button type="button" onclick="window.closeModal('deposit-modal')" class="flex-1 px-4 py-4 bg-theme-bg border border-theme-border text-theme-text rounded-xl hover:bg-theme-card transition-all text-[10px] font-black uppercase tracking-widest shadow-sm">Batal</button>
                     <button type="submit" id="btn-submit-deposit" class="flex-1 px-4 py-4 bg-emerald-500 text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-400 transition-all shadow-md">Terima & Simpan</button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Gembok PIN Brankas -->
+    <div id="pin-modal" class="hidden fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[100] justify-center items-center p-4">
+        <div class="bg-theme-card rounded-3xl w-full max-w-xs border border-theme-accent/30 shadow-2xl overflow-hidden text-center p-6 sm:p-8 relative transition-all animate-fade-in">
+            <button onclick="window.closeModal('pin-modal')" class="absolute top-4 right-4 w-8 h-8 bg-theme-bg border border-theme-border text-theme-muted rounded-full flex items-center justify-center hover:text-rose-500 hover:border-rose-500 transition-colors"><i class="ph ph-x"></i></button>
+            <div class="w-16 h-16 rounded-2xl bg-theme-accent/10 text-theme-accent flex items-center justify-center text-3xl mx-auto mb-5 shadow-inner"><i class="ph ph-lock-key"></i></div>
+            <h3 class="text-sm font-bold text-theme-text mb-1">Akses Terkunci</h3>
+            <p class="text-[10px] font-medium text-theme-muted mb-6 leading-relaxed">Area Brankas bersifat rahasia. Masukkan PIN untuk melanjutkan.</p>
+            
+            <form onsubmit="window.verifyBrankasPin(event)" class="space-y-4">
+                <input type="password" id="brankas-pin-input" placeholder="••••••" class="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-theme-text text-center text-2xl tracking-[0.5em] font-black outline-none focus:border-theme-accent shadow-inner transition-colors" autocomplete="off" required/>
+                <button type="submit" class="w-full px-4 py-3.5 bg-theme-accent text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-md">Buka Brankas</button>
             </form>
         </div>
     </div>
