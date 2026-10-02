@@ -1,4 +1,6 @@
 import { auth, signInAnonymously, onSnapshot, getPosCol, getPosDoc, updateDoc, addDoc, deleteDoc } from './firebase-db.js';
+// Tambahan library Firestore untuk fitur Filter (Query) dan Tarik Data Manual (getDocs)
+import { query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 let isAuthReady = false;
 
@@ -125,7 +127,10 @@ async function initAuth() {
             renderCategories(); updateCategoryDropdowns();
         });
 
-        onSnapshot(getPosCol('finance_mutations'), (snap) => {
+        // OPTIMASI PERFORMA: Hanya download data mutasi aktif yang belum di-Tutup Buku (isArchived == false)
+        const qMutationsActiveOnly = query(getPosCol('finance_mutations'), where('isArchived', '==', false));
+        
+        onSnapshot(qMutationsActiveOnly, (snap) => {
             mutations = []; trashMutations = []; const nowTime = new Date().getTime();
             snap.forEach(d => {
                 const data = d.data();
@@ -192,7 +197,9 @@ async function initAuth() {
 
 const calculateTotalKas = () => {
     let total = 0;
+    // Data sejarah ditarik dari arsip (sangat ringan)
     archivesData.forEach(a => { total += parseFloat(a.netProfit) || 0; });
+    // Data hari ini ditarik dari mutasi aktif
     mutations.filter(m => !m.isArchived).forEach(m => {
         if (m.type === 'income') total += parseFloat(m.amount) || 0;
         else if (m.type === 'expense') total -= parseFloat(m.amount) || 0;
@@ -880,8 +887,12 @@ const renderArchives = () => {
     });
 };
 
-window.openArchiveDetail = (archiveId) => {
+// PERUBAHAN: Tarik data arsip spesifik secara on-demand saat diklik
+window.openArchiveDetail = async (archiveId) => {
     const a = archivesData.find(x => x.id === archiveId); if(!a) return;
+    
+    showLoading("Membuka Arsip..."); 
+    
     document.getElementById('current-library-id').value = a.id;
     document.getElementById('lib-title').innerText = a.name;
     document.getElementById('lib-date').innerText = `Periode: ${a.startDate.split('-').reverse().join('/')} - ${a.endDate.split('-').reverse().join('/')}`;
@@ -895,7 +906,14 @@ window.openArchiveDetail = (archiveId) => {
         a.notes.forEach(n => { notesContainer.innerHTML += `<li class="flex items-start"><i class="ph ph-caret-right text-theme-accent mr-2 mt-0.5"></i> ${n}</li>`; });
     } else { notesContainer.innerHTML = `<li class="text-theme-muted italic">Tidak ada catatan untuk periode ini.</li>`; }
 
-    const linkedMuts = mutations.filter(m => m.archiveId === a.id);
+    // Proses download data historis secara otomatis
+    const qArchive = query(getPosCol('finance_mutations'), where('archiveId', '==', archiveId));
+    const snap = await getDocs(qArchive);
+    const linkedMuts = [];
+    snap.forEach(d => linkedMuts.push({id: d.id, ...d.data()}));
+    
+    linkedMuts.sort((x, y) => new Date(x.date) - new Date(y.date));
+
     let catIn = {}, catOut = {};
     const tbody = document.getElementById('lib-table-body'); tbody.innerHTML = '';
     
@@ -920,10 +938,13 @@ window.openArchiveDetail = (archiveId) => {
     if(linkedMuts.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-[10px] text-theme-muted font-bold uppercase">Data transaksi kosong/hilang</td></tr>`;
 
     renderTbCharts(catIn, catOut, 'lib-chart-in', 'lib-chart-out', true);
+    
+    hideLoading();
     document.getElementById('library-detail-modal').classList.remove('hidden');
     document.getElementById('library-detail-modal').classList.add('flex');
 };
 
+// PERUBAHAN: Memastikan hapus arsip mengembalikan data ke server
 window.confirmDeleteArchive = () => {
     window.showConfirmModal('Hapus & Kembalikan Data', 'Hapus arsip ini? Semua data transaksi di dalamnya akan dikeluarkan dan KEMBALI ke Mutasi Kas.', async () => {
         const archiveId = document.getElementById('current-library-id').value;
@@ -931,11 +952,15 @@ window.confirmDeleteArchive = () => {
         
         showLoading("Mengembalikan data mutasi...");
         try {
-            const linkedMuts = mutations.filter(m => m.archiveId === archiveId);
-            for(let m of linkedMuts) {
-                await updateDoc(getPosDoc("finance_mutations", m.id), { isArchived: false, archiveId: null });
+            const qArchive = query(getPosCol('finance_mutations'), where('archiveId', '==', archiveId));
+            const snap = await getDocs(qArchive);
+            
+            for(let d of snap.docs) {
+                await updateDoc(getPosDoc("finance_mutations", d.id), { isArchived: false, archiveId: null });
             }
+            
             await deleteDoc(getPosDoc("finance_archives", archiveId));
+            
             hideLoading();
             showToast("Laporan dihapus, data dikembalikan ke Mutasi Kas.", "success");
             window.closeModal('library-detail-modal');
@@ -1022,9 +1047,6 @@ const hideLoading = () => {
     ls.classList.add('opacity-0'); setTimeout(() => ls.classList.add('pointer-events-none'), 500);
 };
 
-// =========================================================================
-// FUNGSI BARU: UNDUH LAPORAN EXCEL
-// =========================================================================
 window.downloadLaporanExcel = async () => {
     if (!window.tempArsipData) return showToast("Silakan klik Analisa terlebih dahulu!", "error");
     
