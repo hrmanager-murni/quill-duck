@@ -1,4 +1,4 @@
-import { auth, signInAnonymously, onSnapshot, getPosCol, getPosDoc, updateDoc, addDoc, deleteDoc } from './firebase-db.js';
+import { auth, signInAnonymously, onSnapshot, getPosCol, getPosDoc, updateDoc, addDoc, deleteDoc, getDoc, setDoc } from './firebase-db.js';
 // Tambahan library Firestore untuk fitur Filter (Query) dan Tarik Data Manual (getDocs)
 import { query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -53,6 +53,40 @@ const showToast = (msg, type = 'info') => {
 window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 window.toggleMobileMenu = () => document.getElementById('mobile-menu').classList.toggle('hidden');
 
+// Logika Baru: Melipat (Collapse) Sidebar
+window.isSidebarCollapsed = false;
+window.toggleSidebar = () => {
+    const sidebar = document.getElementById('sidebar');
+    const icon = document.getElementById('sidebar-icon');
+    const brand = document.getElementById('sidebar-brand');
+    const logo = document.getElementById('sidebar-logo');
+    const texts = document.querySelectorAll('.sidebar-text');
+    
+    window.isSidebarCollapsed = !window.isSidebarCollapsed;
+    
+    if(window.isSidebarCollapsed) {
+        // Mode Ramping (Icon saja)
+        sidebar.classList.remove('lg:w-64');
+        sidebar.classList.add('lg:w-20');
+        icon.classList.remove('ph-caret-left');
+        icon.classList.add('ph-caret-right');
+        brand.classList.remove('lg:block');
+        logo.classList.remove('lg:w-14', 'lg:h-14');
+        logo.classList.add('w-10', 'h-10');
+        texts.forEach(t => t.classList.remove('lg:block'));
+    } else {
+        // Mode Lebar (Teks lengkap)
+        sidebar.classList.remove('lg:w-20');
+        sidebar.classList.add('lg:w-64');
+        icon.classList.remove('ph-caret-right');
+        icon.classList.add('ph-caret-left');
+        brand.classList.add('lg:block');
+        logo.classList.remove('w-10', 'h-10');
+        logo.classList.add('lg:w-14', 'lg:h-14');
+        texts.forEach(t => t.classList.add('lg:block'));
+    }
+};
+
 window.toggleTheme = () => {
     currentTheme = currentTheme === 'dark' ? 'soft' : 'dark';
     const themeName = currentTheme === 'dark' ? 'Ubah ke Soft Mode' : 'Ubah ke Night Mode';
@@ -67,21 +101,74 @@ window.toggleTheme = () => {
     if(!document.getElementById('tb-result-container').classList.contains('hidden')) window.generateTutupBuku();
 };
 
+// Variabel status gembok (Awalnya selalu terkunci)
+window.isBrankasUnlocked = false;
+
+window.verifyBrankasPin = async (e) => {
+    e.preventDefault();
+    const pinInput = document.getElementById('brankas-pin-input').value;
+    
+    // Ubah teks tombol jadi loading saat menunggu jawaban server
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "Memeriksa...";
+    btn.disabled = true;
+
+    try {
+        // Ambil data PIN dari Firestore (Koleksi: finance_settings, Dokumen: security)
+        const docRef = getPosDoc("finance_settings", "security");
+        const docSnap = await getDoc(docRef);
+
+        let validPin = "123456"; // PIN Default awal
+
+        if (docSnap.exists()) {
+            validPin = docSnap.data().brankas_pin;
+        } else {
+            // Jika Anda belum pernah membuat PIN di Firebase, sistem akan membuatkannya otomatis
+            await setDoc(docRef, { brankas_pin: "123456" });
+        }
+
+        if(pinInput === validPin) { 
+            window.isBrankasUnlocked = true;
+            window.closeModal('pin-modal');
+            window.switchTab('brankas');
+            showToast('Brankas berhasil dibuka', 'success');
+        } else {
+            showToast('PIN Salah! Akses Ditolak.', 'error');
+        }
+    } catch (err) {
+        showToast('Gagal terhubung ke server', 'error');
+        console.error(err);
+    } finally {
+        document.getElementById('brankas-pin-input').value = '';
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
+
 window.switchTab = (tabName) => {
+    // Pengecekan Keamanan Gembok Brankas
+    if(tabName === 'brankas' && !window.isBrankasUnlocked) {
+        document.getElementById('pin-modal').classList.remove('hidden');
+        document.getElementById('pin-modal').classList.add('flex');
+        setTimeout(() => document.getElementById('brankas-pin-input').focus(), 100);
+        return; // Hentikan fungsi agar tab tidak berubah
+    }
+
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
     document.getElementById(`tab-${tabName}`).classList.remove('hidden');
     document.getElementById('page-title').innerText = tabName.replace('-', ' ');
     
     document.querySelectorAll('[id^="btn-tab-"]').forEach(b => {
-        b.classList.remove('bg-theme-bg', 'border', 'border-theme-border', 'text-theme-text');
-        b.classList.add('text-theme-muted', 'hover:bg-theme-bg/50');
+        b.classList.remove('bg-theme-accent/10', 'text-theme-accent');
+        b.classList.add('text-theme-muted');
         const i = b.querySelector('i'); if(i) i.classList.remove('text-theme-accent');
     });
     
     const activeBtn = document.getElementById(`btn-tab-${tabName}`);
     if(activeBtn) {
-        activeBtn.classList.remove('text-theme-muted', 'hover:bg-theme-bg/50');
-        activeBtn.classList.add('bg-theme-bg', 'border', 'border-theme-border', 'text-theme-text');
+        activeBtn.classList.remove('text-theme-muted');
+        activeBtn.classList.add('bg-theme-accent/10', 'text-theme-accent');
         const i = activeBtn.querySelector('i'); if(i) i.classList.add('text-theme-accent');
     }
 
@@ -335,16 +422,30 @@ window.fetchRawTransactionsForSetoran = () => {
 window.filterMutasiTables = () => {
     const incCat = document.getElementById('filter-income-cat').value;
     const incDate = document.getElementById('filter-income-date').value;
+    const incSearch = document.getElementById('filter-income-search')?.value.toLowerCase() || '';
+
     const expCat = document.getElementById('filter-expense-cat').value;
     const expDate = document.getElementById('filter-expense-date').value;
+    const expSearch = document.getElementById('filter-expense-search')?.value.toLowerCase() || '';
 
+    // Filter Pemasukan
     let filteredInc = mutations.filter(m => m.type === 'income' && !m.isArchived);
     if(incCat !== 'ALL') filteredInc = filteredInc.filter(m => m.category === incCat);
     if(incDate) filteredInc = filteredInc.filter(m => m.date === incDate);
+    if(incSearch) filteredInc = filteredInc.filter(m => (m.description||'').toLowerCase().includes(incSearch));
 
+    // Filter Pengeluaran (Termasuk pencarian ke dalam detail barang nota bulk)
     let filteredExp = mutations.filter(m => m.type === 'expense' && !m.isArchived);
     if(expCat !== 'ALL') filteredExp = filteredExp.filter(m => m.category === expCat);
     if(expDate) filteredExp = filteredExp.filter(m => m.date === expDate);
+    if(expSearch) {
+        filteredExp = filteredExp.filter(m => {
+            let matchDesc = (m.description||'').toLowerCase().includes(expSearch);
+            let matchBulk = false;
+            if(m.bulkData) matchBulk = m.bulkData.some(b => (b.name||'').toLowerCase().includes(expSearch));
+            return matchDesc || matchBulk; 
+        });
+    }
 
     renderMutasiTable('income-list', filteredInc, 'income');
     renderMutasiTable('expense-list', filteredExp, 'expense');
@@ -352,7 +453,16 @@ window.filterMutasiTables = () => {
 
 const renderMutasiTable = (containerId, data, type) => {
     const container = document.getElementById(containerId); container.innerHTML = '';
-    if(data.length === 0) { container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-theme-muted opacity-50"><i class="ph ph-receipt text-3xl mb-2"></i><p class="text-[9px] font-black uppercase tracking-widest">Tidak ada data</p></div>`; return; }
+    
+    // Tampilan kosong (Empty State) yang modern
+    if(data.length === 0) { 
+        container.innerHTML = `
+        <div class="h-full flex flex-col items-center justify-center text-theme-muted opacity-60">
+            <div class="w-16 h-16 bg-theme-card rounded-full flex items-center justify-center mb-3 shadow-inner"><i class="ph ph-receipt text-3xl"></i></div>
+            <p class="text-xs font-semibold tracking-wide">Data tidak ditemukan</p>
+        </div>`; 
+        return; 
+    }
     
     data.forEach(m => {
         const catObj = categories.find(c => c.name === m.category); 
@@ -363,40 +473,51 @@ const renderMutasiTable = (containerId, data, type) => {
         let bulkHtml = '';
         if (m.bulkData && m.bulkData.length > 0) {
             bulkHtml = `
-            <div class="mt-3">
-                <button onclick="window.toggleBulkAccordion('${m.id}')" class="flex items-center space-x-1 text-[9px] font-bold text-theme-muted hover:text-theme-text transition-colors">
-                    <i id="bulk-icon-${m.id}" class="ph ph-caret-down transition-transform"></i><span>Lihat Detail Nota (${m.bulkData.length} Item)</span>
+            <div class="mt-4 pl-4 border-l-2 border-theme-border/50">
+                <button onclick="window.toggleBulkAccordion('${m.id}')" class="flex items-center space-x-2 text-[10px] font-semibold text-theme-muted hover:text-theme-text transition-colors bg-theme-card px-3 py-1.5 rounded-lg border border-theme-border shadow-sm">
+                    <i id="bulk-icon-${m.id}" class="ph ph-caret-down transition-transform"></i><span>Lihat Rincian Nota (${m.bulkData.length} item)</span>
                 </button>
-                <div id="bulk-acc-${m.id}" class="hidden mt-2 pt-2 border-t border-theme-border/50 text-[9px] space-y-1">`;
-            m.bulkData.forEach(b => { bulkHtml += `<div class="flex justify-between text-theme-muted"><span>- ${b.name}</span><span class="font-bold">${formatRp(b.price)}</span></div>`; });
+                <div id="bulk-acc-${m.id}" class="hidden mt-2 p-3 bg-theme-card border border-theme-border rounded-xl text-[10px] space-y-2 shadow-inner">`;
+            m.bulkData.forEach(b => { 
+                bulkHtml += `<div class="flex justify-between items-center text-theme-muted border-b border-theme-border/50 pb-1.5 mb-1.5 last:border-0 last:mb-0 last:pb-0"><span class="truncate pr-2">${b.name}</span><span class="font-bold text-theme-text shrink-0">${formatRp(b.price)}</span></div>`; 
+            });
             bulkHtml += `</div></div>`;
         }
 
         let btnEdit = '', btnDel = '';
         if(!isSystem) {
-            btnEdit = `<button onclick="window.editMutation('${m.id}')" class="w-7 h-7 bg-theme-bg border border-theme-border text-theme-muted hover:text-blue-500 hover:border-blue-500 rounded-lg flex items-center justify-center transition-colors"><i class="ph ph-pencil-simple"></i></button>`;
-            btnDel = `<button onclick="window.deleteMutation('${m.id}')" class="w-7 h-7 bg-theme-bg border border-theme-border text-theme-muted hover:text-rose-500 hover:border-rose-500 rounded-lg flex items-center justify-center transition-colors"><i class="ph ph-trash"></i></button>`;
+            btnEdit = `<button onclick="window.editMutation('${m.id}')" class="w-8 h-8 bg-theme-bg border border-theme-border text-theme-muted hover:text-blue-500 hover:border-blue-500 rounded-xl flex items-center justify-center transition-colors shadow-sm"><i class="ph ph-pencil-simple text-sm"></i></button>`;
+            btnDel = `<button onclick="window.deleteMutation('${m.id}')" class="w-8 h-8 bg-theme-bg border border-theme-border text-theme-muted hover:text-rose-500 hover:border-rose-500 rounded-xl flex items-center justify-center transition-colors shadow-sm"><i class="ph ph-trash text-sm"></i></button>`;
         } else if (m.category === 'Setoran') {
-            btnEdit = `<button onclick="window.editMutation('${m.id}', true)" class="w-7 h-7 bg-theme-bg border border-theme-border text-theme-muted hover:text-amber-500 hover:border-amber-500 rounded-lg flex items-center justify-center transition-colors" title="Edit Fisik"><i class="ph ph-pencil-simple"></i></button>`;
+            btnEdit = `<button onclick="window.editMutation('${m.id}', true)" class="w-8 h-8 bg-theme-bg border border-theme-border text-theme-muted hover:text-amber-500 hover:border-amber-500 rounded-xl flex items-center justify-center transition-colors shadow-sm" title="Edit Fisik"><i class="ph ph-pencil-simple text-sm"></i></button>`;
         }
 
-        let archiveTag = m.isArchived ? `<span class="px-1.5 py-0.5 bg-theme-accent/20 text-theme-accent text-[8px] rounded uppercase font-black ml-2">Arsip</span>` : '';
-        let editLabel = m.updatedAt ? `<br><span class="text-[8px] italic opacity-70 flex items-center mt-0.5"><i class="ph ph-pencil-simple mr-1"></i>Diedit: ${formatEditTime(m.updatedAt)}</span>` : '';
+        let archiveTag = m.isArchived ? `<span class="px-2 py-0.5 bg-theme-accent/10 text-theme-accent text-[9px] rounded-md uppercase font-bold ml-2 border border-theme-accent/20">Arsip</span>` : '';
+        let editLabel = m.updatedAt ? `<span class="text-[9px] font-medium text-theme-muted flex items-center mt-1"><i class="ph ph-pencil-simple mr-1"></i>Diedit ${formatEditTime(m.updatedAt)}</span>` : '';
 
         container.innerHTML += `
-            <div class="p-3 mb-2 bg-theme-card border border-theme-border rounded-2xl flex flex-col justify-between group hover:border-theme-accent/50 transition-colors relative overflow-hidden shadow-sm">
-                ${isSystem ? `<div class="absolute -right-2 -top-2 text-theme-muted/10 text-4xl"><i class="ph ph-lock-key"></i></div>` : ''}
-                <div class="flex justify-between items-start mb-2 relative z-10">
-                    <div>
-                        <span class="px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded text-white shadow-sm" style="background-color: ${color}">${m.category}</span>
+            <div class="p-4 sm:p-5 bg-theme-card border border-theme-border rounded-2xl flex flex-col justify-between group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden">
+                ${isSystem ? `<div class="absolute -right-2 -top-2 text-theme-muted/5 text-6xl pointer-events-none"><i class="ph ph-lock-key"></i></div>` : ''}
+                
+                <div class="flex justify-between items-start mb-3 relative z-10">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full mr-2.5 shadow-sm" style="background-color: ${color}"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-theme-text">${m.category}</span>
                         ${archiveTag}
-                        <p class="text-[9px] font-bold text-theme-muted mt-1">${m.date.split('-').reverse().join('/')}</p>
                     </div>
-                    <div class="flex space-x-1">${btnEdit}${btnDel}</div>
+                    <div class="flex space-x-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
+                        ${btnEdit}${btnDel}
+                    </div>
                 </div>
-                <div class="relative z-10">
-                    <h4 class="text-xs font-bold text-theme-text">${m.description}${editLabel}</h4>
-                    <div class="mt-1 text-sm font-black ${textColorClass} tracking-tight drop-shadow-sm pb-1 leading-tight overflow-visible">${formatRp(m.amount)}</div>
+
+                <div class="relative z-10 pl-5.5 ml-1.5 border-l-2 border-theme-border group-hover:border-theme-accent/50 transition-colors duration-300">
+                    <h4 class="text-sm font-semibold text-theme-text mb-1 leading-snug">${m.description}</h4>
+                    <div class="text-xl font-bold ${textColorClass} tracking-tight drop-shadow-sm mb-2">${formatRp(m.amount)}</div>
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                        <p class="text-[10px] font-medium text-theme-muted flex items-center"><i class="ph ph-calendar-blank mr-1"></i>${m.date.split('-').reverse().join('/')}</p>
+                        ${editLabel}
+                    </div>
                 </div>
                 ${bulkHtml}
             </div>`;
