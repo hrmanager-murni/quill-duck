@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, collection, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// KITA MENAMBAHKAN getDoc & setDoc DI BARIS BAWAH INI
+import { getFirestore, doc, collection, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCRH_6JZoRvKRgbEU_WNNtSOFZ2d83kfys",
@@ -21,4 +22,4 @@ const getPosCol = (colName) => collection(db, 'artifacts', posAppId, 'public', '
 const getPosDoc = (colName, docId) => doc(db, 'artifacts', posAppId, 'public', 'data', colName, docId);
 
 // Export (bagikan) fungsi Firebase agar bisa dipakai oleh file app.js
-export { auth, db, signInAnonymously, onSnapshot, getPosCol, getPosDoc, updateDoc, addDoc, deleteDoc };
+export { auth, db, signInAnonymously, onSnapshot, getPosCol, getPosDoc, updateDoc, addDoc, deleteDoc, getDoc, setDoc };
