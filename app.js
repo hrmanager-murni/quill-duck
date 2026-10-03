@@ -596,7 +596,8 @@ const renderMutasiTable = (containerId, data, type) => {
                 
                 <!-- Rincian Nota -->
                 ${bulkHtml}
-            </div>`;);
+            </div>`;
+    });
 };
 
 // FUNGSI BARU: Membuka Rekap Data Mutasi per Kategori
