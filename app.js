@@ -535,58 +535,68 @@ const renderMutasiTable = (containerId, data, type) => {
         let bulkHtml = '';
         if (m.bulkData && m.bulkData.length > 0) {
             bulkHtml = `
-            <div class="mt-4 pl-4 border-l-2 border-theme-border/50">
-                <button onclick="window.toggleBulkAccordion('${m.id}')" class="flex items-center space-x-2 text-[10px] font-semibold text-theme-muted hover:text-theme-text transition-colors bg-theme-card px-3 py-1.5 rounded-lg border border-theme-border shadow-sm">
-                    <i id="bulk-icon-${m.id}" class="ph ph-caret-down transition-transform"></i><span>Lihat Rincian Nota (${m.bulkData.length} item)</span>
+            <div class="mt-3 pt-3 border-t border-theme-border/50">
+                <button onclick="window.toggleBulkAccordion('${m.id}')" class="flex items-center justify-between w-full text-[10px] font-bold text-theme-muted hover:text-theme-text transition-colors group/bulk">
+                    <span class="flex items-center"><i class="ph ph-receipt mr-1.5 text-sm text-theme-accent/70"></i> Rincian Nota (${m.bulkData.length} item)</span>
+                    <div class="w-5 h-5 rounded-full bg-theme-bg flex items-center justify-center border border-theme-border group-hover/bulk:border-theme-accent/50">
+                        <i id="bulk-icon-${m.id}" class="ph ph-caret-down transition-transform"></i>
+                    </div>
                 </button>
-                <div id="bulk-acc-${m.id}" class="hidden mt-2 p-3 bg-theme-card border border-theme-border rounded-xl text-[10px] space-y-2 shadow-inner">`;
+                <div id="bulk-acc-${m.id}" class="hidden mt-3 p-3 bg-theme-bg rounded-xl border border-theme-border text-[10px] space-y-2 shadow-inner">`;
             m.bulkData.forEach(b => { 
-                bulkHtml += `<div class="flex justify-between items-center text-theme-muted border-b border-theme-border/50 pb-1.5 mb-1.5 last:border-0 last:mb-0 last:pb-0"><span class="truncate pr-2">${b.name}</span><span class="font-bold text-theme-text shrink-0">${formatRp(b.price)}</span></div>`; 
+                bulkHtml += `<div class="flex justify-between items-center text-theme-muted border-b border-theme-border/50 pb-1.5 mb-1.5 last:border-0 last:mb-0 last:pb-0"><span class="truncate pr-2 opacity-80">- ${b.name}</span><span class="font-bold text-theme-text shrink-0">${formatRp(b.price)}</span></div>`; 
             });
             bulkHtml += `</div></div>`;
         }
 
         let btnEdit = '', btnDel = '';
         if(!isSystem) {
-            btnEdit = `<button onclick="window.editMutation('${m.id}')" class="w-8 h-8 bg-theme-bg border border-theme-border text-theme-muted hover:text-blue-500 hover:border-blue-500 rounded-xl flex items-center justify-center transition-colors shadow-sm"><i class="ph ph-pencil-simple text-sm"></i></button>`;
-            btnDel = `<button onclick="window.deleteMutation('${m.id}')" class="w-8 h-8 bg-theme-bg border border-theme-border text-theme-muted hover:text-rose-500 hover:border-rose-500 rounded-xl flex items-center justify-center transition-colors shadow-sm"><i class="ph ph-trash text-sm"></i></button>`;
+            btnEdit = `<button onclick="window.editMutation('${m.id}')" class="w-7 h-7 bg-theme-bg border border-theme-border text-theme-muted hover:text-amber-500 hover:border-amber-500 rounded-lg flex items-center justify-center transition-colors shadow-sm" title="Edit"><i class="ph ph-pencil-simple text-xs"></i></button>`;
+            btnDel = `<button onclick="window.deleteMutation('${m.id}')" class="w-7 h-7 bg-theme-bg border border-theme-border text-theme-muted hover:text-rose-500 hover:border-rose-500 rounded-lg flex items-center justify-center transition-colors shadow-sm" title="Hapus"><i class="ph ph-trash text-xs"></i></button>`;
         } else if (m.category === 'Setoran') {
-            btnEdit = `<button onclick="window.editMutation('${m.id}', true)" class="w-8 h-8 bg-theme-bg border border-theme-border text-theme-muted hover:text-amber-500 hover:border-amber-500 rounded-xl flex items-center justify-center transition-colors shadow-sm" title="Edit Fisik"><i class="ph ph-pencil-simple text-sm"></i></button>`;
+            btnEdit = `<button onclick="window.editMutation('${m.id}', true)" class="w-7 h-7 bg-theme-bg border border-theme-border text-theme-muted hover:text-amber-500 hover:border-amber-500 rounded-lg flex items-center justify-center transition-colors shadow-sm" title="Edit Fisik"><i class="ph ph-pencil-simple text-xs"></i></button>`;
         }
 
-        let archiveTag = m.isArchived ? `<span class="px-2 py-0.5 bg-theme-accent/10 text-theme-accent text-[9px] rounded-md uppercase font-bold ml-2 border border-theme-accent/20">Arsip</span>` : '';
-        let editLabel = m.updatedAt ? `<span class="text-[9px] font-medium text-theme-muted flex items-center mt-1"><i class="ph ph-pencil-simple mr-1"></i>Diedit ${formatEditTime(m.updatedAt)}</span>` : '';
+        let archiveTag = m.isArchived ? `<span class="px-1.5 py-0.5 bg-theme-accent/10 text-theme-accent text-[8px] rounded uppercase font-bold border border-theme-accent/20">Arsip</span>` : '';
+        // Label edit dibuat sangat ringkas di samping tanggal
+        let editLabel = m.updatedAt ? `<span class="text-[8px] italic opacity-50 border-l border-theme-border/50 pl-1.5">Diedit ${formatEditTime(m.updatedAt)}</span>` : '';
 
+        // TATA LETAK BARU: Horizontal dan sangat padat/kompak
         container.innerHTML += `
-            <div class="p-4 sm:p-5 bg-theme-card border border-theme-border rounded-2xl flex flex-col justify-between group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden">
-                ${isSystem ? `<div class="absolute -right-2 -top-2 text-theme-muted/5 text-6xl pointer-events-none"><i class="ph ph-lock-key"></i></div>` : ''}
+            <div class="p-3 sm:p-4 bg-theme-card border border-theme-border rounded-2xl hover:shadow-md hover:border-theme-accent/40 transition-all duration-300 relative overflow-hidden group">
+                ${isSystem ? `<div class="absolute -right-2 -top-2 text-theme-muted/5 text-5xl pointer-events-none"><i class="ph ph-lock-key"></i></div>` : ''}
                 
-                <div class="flex justify-between items-start mb-3 relative z-10">
-                    <div class="flex items-center">
-                        <!-- Mengganti titik warna dengan kotak ikon elegan -->
-                        <div class="w-7 h-7 rounded-lg flex items-center justify-center mr-2.5 shadow-sm text-white" style="background-color: ${color}">
-                            <i class="ph ${catObj && catObj.icon ? catObj.icon : 'ph-tag'} text-sm font-bold drop-shadow-sm"></i>
+                <div class="flex justify-between items-center relative z-10">
+                    <!-- Bagian Kiri: Ikon, Kategori, Judul, Tanggal -->
+                    <div class="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white shadow-sm shrink-0 mt-0.5" style="background-color: ${color}">
+                            <i class="ph ${catObj && catObj.icon ? catObj.icon : 'ph-tag'} text-lg sm:text-xl drop-shadow-sm"></i>
                         </div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-theme-text">${m.category}</span>
-                        ${archiveTag}
+                        <div class="flex flex-col flex-1 min-w-0">
+                            <div class="flex items-center space-x-2 mb-0.5">
+                                <span class="text-[9px] font-black uppercase tracking-widest text-theme-muted truncate">${m.category}</span>
+                                ${archiveTag}
+                            </div>
+                            <h4 class="text-xs sm:text-sm font-bold text-theme-text truncate leading-tight">${m.description}</h4>
+                            <div class="flex items-center space-x-1.5 mt-1 text-[9px] font-medium text-theme-muted">
+                                <span><i class="ph ph-calendar-blank mr-1"></i>${m.date.split('-').reverse().join('/')}</span>
+                                ${editLabel}
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex space-x-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
-                        ${btnEdit}${btnDel}
-                    </div>
-                </div>
-
-                <div class="relative z-10 pl-5.5 ml-1.5 border-l-2 border-theme-border group-hover:border-theme-accent/50 transition-colors duration-300">
-                    <h4 class="text-sm font-semibold text-theme-text mb-1 leading-snug">${m.description}</h4>
-                    <div class="text-xl font-bold ${textColorClass} tracking-tight drop-shadow-sm mb-2">${formatRp(m.amount)}</div>
                     
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                        <p class="text-[10px] font-medium text-theme-muted flex items-center"><i class="ph ph-calendar-blank mr-1"></i>${m.date.split('-').reverse().join('/')}</p>
-                        ${editLabel}
+                    <!-- Bagian Kanan: Nominal Uang & Tombol -->
+                    <div class="flex flex-col items-end shrink-0 ml-3">
+                        <span class="text-sm sm:text-base font-black ${textColorClass} tracking-tight">${formatRp(m.amount)}</span>
+                        <div class="flex space-x-1 mt-1.5 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-opacity duration-200">
+                            ${btnEdit}${btnDel}
+                        </div>
                     </div>
                 </div>
+                
+                <!-- Rincian Nota -->
                 ${bulkHtml}
-            </div>`;
-    });
+            </div>`;);
 };
 
 // FUNGSI BARU: Membuka Rekap Data Mutasi per Kategori
