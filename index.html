@@ -294,35 +294,35 @@
             <div id="tab-mutasi" class="tab-content max-w-7xl mx-auto flex flex-col space-y-5 hidden h-[calc(100vh-100px)]">
                 
                 <!-- TOP SECTION: Saldo Kas & Notifikasi (Bersebelahan) -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-5 shrink-0">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 shrink-0">
                     
                     <!-- Kotak 1: Saldo Kas (Lebih Lebar) -->
-                    <div class="md:col-span-7 bg-gradient-to-br from-theme-card to-emerald-500/5 p-5 sm:px-8 rounded-2xl border border-emerald-500/20 relative overflow-hidden shadow-sm flex items-center justify-between group transition-all hover:shadow-md">
-                        <div class="z-10">
-                            <div class="flex items-center space-x-2 mb-1.5">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <p class="text-[10px] font-bold text-theme-muted tracking-widest uppercase">Saldo Kas Operasional</p>
+                    <div class="md:col-span-7 bg-gradient-to-br from-theme-card to-emerald-500/5 py-4 px-6 sm:px-8 rounded-2xl border border-emerald-500/20 relative overflow-hidden shadow-sm flex items-center justify-between group transition-all hover:shadow-md h-24">
+                        <div class="z-10 flex flex-col justify-center h-full">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <p class="text-[9px] font-bold text-theme-muted tracking-widest uppercase">Saldo Kas Operasional</p>
                             </div>
-                            <h2 id="total-kas-display" class="text-3xl sm:text-4xl lg:text-5xl font-black text-theme-accent tracking-tight drop-shadow-sm pb-1">Rp 0</h2>
+                            <h2 id="total-kas-display" class="text-2xl sm:text-3xl lg:text-4xl font-black text-theme-accent tracking-tight drop-shadow-sm leading-none">Rp 0</h2>
                         </div>
-                        <i class="ph ph-wallet text-7xl text-theme-accent opacity-5 absolute -right-2 -bottom-4 transform -rotate-12 group-hover:scale-110 transition-transform pointer-events-none"></i>
+                        <i class="ph ph-wallet text-6xl text-theme-accent opacity-5 absolute -right-2 -bottom-2 transform -rotate-12 group-hover:scale-110 transition-transform pointer-events-none"></i>
                     </div>
 
                     <!-- Kotak 2: Tombol Notifikasi Setoran (Cerdas) -->
-                    <div onclick="window.openModal('pending-deposits-modal')" class="md:col-span-5 bg-theme-card p-5 sm:px-6 rounded-2xl border border-theme-border shadow-sm flex items-center justify-between cursor-pointer hover:border-theme-accent/50 hover:shadow-md transition-all group relative overflow-hidden">
-                        <div class="flex items-center space-x-4 relative z-10">
-                            <div id="pending-icon-bg" class="w-12 h-12 rounded-xl bg-theme-bg border border-theme-border flex items-center justify-center text-theme-muted transition-colors shrink-0">
-                                <i id="pending-icon" class="ph ph-bell-ringing text-xl"></i>
+                    <div onclick="window.openModal('pending-deposits-modal')" class="md:col-span-5 bg-theme-card py-4 px-5 sm:px-6 rounded-2xl border border-theme-border shadow-sm flex items-center justify-between cursor-pointer hover:border-theme-accent/50 hover:shadow-md transition-all group relative overflow-hidden h-24">
+                        <div class="flex items-center space-x-3 sm:space-x-4 relative z-10">
+                            <div id="pending-icon-bg" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-theme-bg border border-theme-border flex items-center justify-center text-theme-muted transition-colors shrink-0">
+                                <i id="pending-icon" class="ph ph-bell-ringing text-lg sm:text-xl"></i>
                             </div>
-                            <div>
-                                <h3 id="pending-title" class="text-sm font-bold text-theme-text transition-colors">Konfirmasi Setoran</h3>
-                                <p id="pending-subtitle" class="text-[10px] font-medium text-theme-muted mt-0.5 transition-colors">Semua setoran sudah dikonfirmasi</p>
+                            <div class="flex flex-col justify-center">
+                                <h3 id="pending-title" class="text-xs sm:text-sm font-bold text-theme-text transition-colors leading-tight">Konfirmasi Setoran</h3>
+                                <p id="pending-subtitle" class="text-[9px] sm:text-[10px] font-medium text-theme-muted mt-0.5 transition-colors leading-tight">Semua setoran sudah dikonfirmasi</p>
                             </div>
                         </div>
-                        <div class="relative z-10 flex items-center space-x-3 shrink-0">
+                        <div class="relative z-10 flex items-center space-x-2 sm:space-x-3 shrink-0">
                             <!-- Badge Angka Notifikasi (Tersembunyi jika 0) -->
-                            <span id="pending-badge" class="hidden flex items-center justify-center min-w-[28px] h-7 px-2 bg-rose-500 text-white rounded-full text-xs font-black shadow-md animate-pulse">0</span>
-                            <i id="pending-arrow" class="ph ph-caret-right text-theme-muted text-xl group-hover:text-theme-accent transition-colors"></i>
+                            <span id="pending-badge" class="hidden flex items-center justify-center min-w-[24px] sm:min-w-[28px] h-6 sm:h-7 px-2 bg-rose-500 text-white rounded-full text-[10px] sm:text-xs font-black shadow-md animate-pulse">0</span>
+                            <i id="pending-arrow" class="ph ph-caret-right text-theme-muted text-lg sm:text-xl group-hover:text-theme-accent transition-colors"></i>
                         </div>
                     </div>
                 </div>
