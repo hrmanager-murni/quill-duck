@@ -514,7 +514,8 @@ window.filterMutasiTables = () => {
 };
 
 const renderMutasiTable = (containerId, data, type) => {
-    const container = document.getElementById(containerId); container.innerHTML = '';
+    const container = document.getElementById(containerId); 
+    container.innerHTML = '';
     
     // Tampilan kosong (Empty State) yang modern
     if(data.length === 0) { 
@@ -525,6 +526,9 @@ const renderMutasiTable = (containerId, data, type) => {
         </div>`; 
         return; 
     }
+    
+    // Optimasi Performa: Kumpulkan HTML di memori dulu agar browser tidak macet
+    let htmlContent = '';
     
     data.forEach(m => {
         const catObj = categories.find(c => c.name === m.category); 
@@ -558,11 +562,10 @@ const renderMutasiTable = (containerId, data, type) => {
         }
 
         let archiveTag = m.isArchived ? `<span class="px-1.5 py-0.5 bg-theme-accent/10 text-theme-accent text-[8px] rounded uppercase font-bold border border-theme-accent/20">Arsip</span>` : '';
-        // Label edit dibuat sangat ringkas di samping tanggal
         let editLabel = m.updatedAt ? `<span class="text-[8px] italic opacity-50 border-l border-theme-border/50 pl-1.5">Diedit ${formatEditTime(m.updatedAt)}</span>` : '';
 
-        // TATA LETAK BARU: Horizontal dan sangat padat/kompak
-        container.innerHTML += `
+        // TATA LETAK BARU: Horizontal dan sangat padat/kompak (Bersih dari duplikasi)
+        htmlContent += `
             <div class="p-3 sm:p-4 bg-theme-card border border-theme-border rounded-2xl hover:shadow-md hover:border-theme-accent/40 transition-all duration-300 relative overflow-hidden group">
                 
                 <div class="flex justify-between items-center relative z-10">
@@ -599,6 +602,10 @@ const renderMutasiTable = (containerId, data, type) => {
                 <!-- Rincian Nota -->
                 ${bulkHtml}
             </div>`;
+    });
+    
+    // Tembakkan semua HTML ke layar dalam 1 detik (Mencegah browser lag/macet)
+    container.innerHTML = htmlContent;
 };
 
 // FUNGSI BARU: Membuka Rekap Data Mutasi per Kategori
