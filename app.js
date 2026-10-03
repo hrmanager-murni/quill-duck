@@ -294,7 +294,13 @@ const calculateTotalKas = () => {
         if (m.type === 'income') total += parseFloat(m.amount) || 0;
         else if (m.type === 'expense') total -= parseFloat(m.amount) || 0;
     });
+    
+    // Update Banner Utama di tab Mutasi
     document.getElementById('total-kas-display').innerText = formatRp(total);
+    
+    // Update juga Sisa Kas Real di Dashboard jika elemennya ada
+    const dashRealKas = document.getElementById('dash-real-kas');
+    if (dashRealKas) dashRealKas.innerText = formatRp(total);
 };
 
 const processPendingDeposits = () => {
