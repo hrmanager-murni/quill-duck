@@ -224,10 +224,8 @@ async function initAuth() {
             renderCategories(); updateCategoryDropdowns();
         });
 
-        // OPTIMASI PERFORMA: Hanya download data mutasi aktif yang belum di-Tutup Buku (isArchived == false)
-        const qMutationsActiveOnly = query(getPosCol('finance_mutations'), where('isArchived', '==', false));
-        
-        onSnapshot(qMutationsActiveOnly, (snap) => {
+        // Menarik data mutasi (Filter dilonggarkan agar data lama yang belum punya label arsip tetap muncul)
+        onSnapshot(getPosCol('finance_mutations'), (snap) => {
             mutations = []; trashMutations = []; const nowTime = new Date().getTime();
             snap.forEach(d => {
                 const data = d.data();
