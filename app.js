@@ -564,7 +564,6 @@ const renderMutasiTable = (containerId, data, type) => {
         // TATA LETAK BARU: Horizontal dan sangat padat/kompak
         container.innerHTML += `
             <div class="p-3 sm:p-4 bg-theme-card border border-theme-border rounded-2xl hover:shadow-md hover:border-theme-accent/40 transition-all duration-300 relative overflow-hidden group">
-                ${isSystem ? `<div class="absolute -right-2 -top-2 text-theme-muted/5 text-5xl pointer-events-none"><i class="ph ph-lock-key"></i></div>` : ''}
                 
                 <div class="flex justify-between items-center relative z-10">
                     <!-- Bagian Kiri: Ikon, Kategori, Judul, Tanggal -->
@@ -574,7 +573,10 @@ const renderMutasiTable = (containerId, data, type) => {
                         </div>
                         <div class="flex flex-col flex-1 min-w-0">
                             <div class="flex items-center space-x-2 mb-0.5">
-                                <span class="text-[9px] font-black uppercase tracking-widest text-theme-muted truncate">${m.category}</span>
+                                <span class="text-[9px] font-black uppercase tracking-widest text-theme-muted truncate flex items-center">
+                                    ${m.category}
+                                    ${isSystem ? `<i class="ph ph-lock-key ml-1.5 text-[10px] opacity-70" title="Data Sistem"></i>` : ''}
+                                </span>
                                 ${archiveTag}
                             </div>
                             <h4 class="text-xs sm:text-sm font-bold text-theme-text truncate leading-tight">${m.description}</h4>
@@ -597,7 +599,6 @@ const renderMutasiTable = (containerId, data, type) => {
                 <!-- Rincian Nota -->
                 ${bulkHtml}
             </div>`;
-    });
 };
 
 // FUNGSI BARU: Membuka Rekap Data Mutasi per Kategori
