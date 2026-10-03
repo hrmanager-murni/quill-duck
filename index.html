@@ -339,8 +339,12 @@
                             <div class="flex items-center space-x-3 w-full sm:w-auto">
                                 <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0"><i class="ph ph-arrow-down-left text-lg font-bold"></i></div>
                                 <h3 class="text-sm font-bold text-theme-text">Pemasukan</h3>
+                                <button onclick="window.openRekapKategori('income')" class="w-6 h-6 rounded-md bg-theme-bg border border-theme-border flex items-center justify-center text-theme-muted hover:text-emerald-500 hover:border-emerald-500 transition-colors shadow-sm" title="Lihat Rekap Kategori Pemasukan"><i class="ph ph-chart-pie-slice"></i></button>
                             </div>
-                            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                            <div class="flex items-center space-x-2 w-full sm:w-auto mt-2 sm:mt-0">
+                                <select id="filter-income-cat" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border rounded-lg px-2 py-2 text-[10px] font-semibold text-theme-text outline-none focus:border-emerald-500 shadow-inner cursor-pointer w-28 sm:w-32 appearance-none">
+                                    <option value="ALL">Semua Kategori</option>
+                                </select>
                                 <div class="relative flex-1 sm:w-40">
                                     <i class="ph ph-magnifying-glass absolute left-2.5 top-2.5 text-theme-muted"></i>
                                     <input type="text" id="filter-income-search" onkeyup="window.filterMutasiTables()" placeholder="Cari..." class="w-full bg-theme-card border border-theme-border rounded-lg pl-8 pr-3 py-2 text-[10px] font-semibold text-theme-text outline-none focus:border-emerald-500 shadow-inner">
@@ -358,8 +362,12 @@
                             <div class="flex items-center space-x-3 w-full sm:w-auto">
                                 <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0"><i class="ph ph-arrow-up-right text-lg font-bold"></i></div>
                                 <h3 class="text-sm font-bold text-theme-text">Pengeluaran</h3>
+                                <button onclick="window.openRekapKategori('expense')" class="w-6 h-6 rounded-md bg-theme-bg border border-theme-border flex items-center justify-center text-theme-muted hover:text-rose-500 hover:border-rose-500 transition-colors shadow-sm" title="Lihat Rekap Kategori Pengeluaran"><i class="ph ph-chart-pie-slice"></i></button>
                             </div>
-                            <div class="flex items-center space-x-2 w-full sm:w-auto">
+                            <div class="flex items-center space-x-2 w-full sm:w-auto mt-2 sm:mt-0">
+                                <select id="filter-expense-cat" onchange="window.filterMutasiTables()" class="bg-theme-card border border-theme-border rounded-lg px-2 py-2 text-[10px] font-semibold text-theme-text outline-none focus:border-rose-500 shadow-inner cursor-pointer w-28 sm:w-32 appearance-none">
+                                    <option value="ALL">Semua Kategori</option>
+                                </select>
                                 <div class="relative flex-1 sm:w-48">
                                     <i class="ph ph-magnifying-glass absolute left-2.5 top-2.5 text-theme-muted"></i>
                                     <input type="text" id="filter-expense-search" onkeyup="window.filterMutasiTables()" placeholder="Cari barang/nota..." class="w-full bg-theme-card border border-theme-border rounded-lg pl-8 pr-3 py-2 text-[10px] font-semibold text-theme-text outline-none focus:border-rose-500 shadow-inner">
@@ -938,6 +946,33 @@
                 <table class="w-full text-left text-xs whitespace-nowrap">
                     <tbody id="pending-table-body" class="divide-y divide-theme-border/30"></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Rekap Kategori -->
+    <div id="rekap-modal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[90] justify-center items-center p-4">
+        <div class="bg-theme-card rounded-3xl w-full max-w-sm border border-theme-border shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-fade-in">
+            <div class="p-5 border-b border-theme-border bg-theme-bg flex justify-between items-center shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div id="rekap-modal-icon" class="w-10 h-10 rounded-xl bg-theme-accent/10 flex items-center justify-center text-theme-accent shrink-0">
+                        <i class="ph ph-chart-pie-slice text-xl font-bold"></i>
+                    </div>
+                    <div>
+                        <h3 id="rekap-modal-title" class="text-sm font-bold text-theme-text">Rekap Kategori</h3>
+                        <p class="text-[10px] text-theme-muted font-medium mt-0.5">Total per kategori (Belum arsip)</p>
+                    </div>
+                </div>
+                <button onclick="window.closeModal('rekap-modal')" class="w-8 h-8 bg-theme-bg text-theme-text rounded-full flex items-center justify-center border border-theme-border hover:bg-rose-500 hover:text-white transition-colors shrink-0"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="overflow-y-auto custom-scrollbar flex-1 p-5 bg-theme-bg/50">
+                <div id="rekap-list-container" class="space-y-3">
+                    <!-- Data List dimasukkan oleh Javascript -->
+                </div>
+            </div>
+            <div class="p-5 bg-theme-card border-t border-theme-border flex justify-between items-center shrink-0">
+                <span class="text-[10px] font-black text-theme-muted uppercase tracking-widest">Total Keseluruhan</span>
+                <span id="rekap-total-amount" class="text-lg font-black text-theme-text tracking-tight drop-shadow-sm">Rp 0</span>
             </div>
         </div>
     </div>
