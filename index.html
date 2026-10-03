@@ -166,27 +166,42 @@
             <!-- TAB: DASHBOARD -->
             <div id="tab-dashboard" class="tab-content max-w-7xl mx-auto space-y-6 hidden">
                 
-                <!-- Filter Panel Modern -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 bg-theme-card p-5 sm:px-6 rounded-2xl border border-theme-border shadow-sm transition-all hover:shadow-md">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 rounded-2xl bg-theme-accent/10 flex items-center justify-center text-theme-accent shrink-0">
-                            <i class="ph ph-calendar-check text-2xl"></i>
+                <!-- Top Section: Filter Panel & Real Cash -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+                    
+                    <!-- Filter Panel Modern (Berbagi Ruang) -->
+                    <div class="xl:col-span-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 bg-theme-card p-5 sm:px-6 rounded-2xl border border-theme-border shadow-sm transition-all hover:shadow-md">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-2xl bg-theme-accent/10 flex items-center justify-center text-theme-accent shrink-0">
+                                <i class="ph ph-calendar-check text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-theme-text">Periode Dasbor</h3>
+                                <p class="text-xs font-medium text-theme-muted mt-0.5">Analisa data berdasarkan rentang waktu</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-base font-bold text-theme-text">Periode Dasbor</h3>
-                            <p class="text-xs font-medium text-theme-muted mt-0.5">Analisa data berdasarkan rentang waktu</p>
+                        <div class="flex items-center bg-theme-bg p-1.5 rounded-xl border border-theme-border w-full sm:w-auto shadow-inner">
+                            <input type="date" id="dash-start" class="bg-transparent text-theme-text text-sm font-semibold outline-none cursor-pointer px-3 w-full sm:w-auto">
+                            <span class="text-theme-muted mx-1"><i class="ph ph-arrow-right"></i></span>
+                            <input type="date" id="dash-end" class="bg-transparent text-theme-text text-sm font-semibold outline-none cursor-pointer px-3 w-full sm:w-auto">
+                            <button onclick="window.applyDashboardFilter()" class="px-5 py-2.5 bg-theme-accent text-slate-900 rounded-lg text-xs font-bold tracking-wide hover:scale-105 transition-transform ml-2 shadow-sm whitespace-nowrap">
+                                Terapkan
+                            </button>
                         </div>
                     </div>
-                    <div class="flex items-center bg-theme-bg p-1.5 rounded-xl border border-theme-border w-full sm:w-auto shadow-inner">
-                        <input type="date" id="dash-start" class="bg-transparent text-theme-text text-sm font-semibold outline-none cursor-pointer px-3 w-full sm:w-auto">
-                        <span class="text-theme-muted mx-1">
-                            <i class="ph ph-arrow-right"></i>
-                        </span>
-                        <input type="date" id="dash-end" class="bg-transparent text-theme-text text-sm font-semibold outline-none cursor-pointer px-3 w-full sm:w-auto">
-                        <button onclick="window.applyDashboardFilter()" class="px-5 py-2.5 bg-theme-accent text-slate-900 rounded-lg text-xs font-bold tracking-wide hover:scale-105 transition-transform ml-2 shadow-sm whitespace-nowrap">
-                            Terapkan
-                        </button>
+
+                    <!-- Saldo Kas Real Indicator (Baru) -->
+                    <div class="bg-gradient-to-br from-theme-card to-emerald-500/5 p-5 sm:px-6 rounded-2xl border border-emerald-500/20 shadow-sm transition-all hover:shadow-md flex items-center justify-between group overflow-hidden relative">
+                        <i class="ph ph-wallet text-6xl text-emerald-500/5 absolute -right-2 -bottom-2 transform -rotate-12 group-hover:scale-110 transition-transform pointer-events-none"></i>
+                        <div class="relative z-10">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <p class="text-[10px] font-bold text-theme-muted tracking-widest uppercase">Sisa Kas Real Hari Ini</p>
+                            </div>
+                            <h3 id="dash-real-kas" class="text-2xl sm:text-3xl font-black text-emerald-500 tracking-tight drop-shadow-sm pb-1">Rp 0</h3>
+                        </div>
                     </div>
+
                 </div>
 
                 <!-- KPI Cards Modern -->
@@ -394,9 +409,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-theme-bg py-2 px-4 flex justify-center items-center shrink-0 border-b border-theme-border text-center">
-                            <span class="text-[9px] font-medium text-theme-muted"><i class="ph ph-info mr-1"></i> Transaksi yang sudah Tutup Buku ada di tab Library.</span>
-                        </div>
+                        <!-- Pemberitahuan dihapus agar tampilan UI lebih bersih -->
                         <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4 bg-theme-bg/50" id="expense-list"></div>
                     </div>
                 </div>
