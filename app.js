@@ -50,7 +50,14 @@ const showToast = (msg, type = 'info') => {
     setTimeout(() => { t.classList.remove('scale-100', 'opacity-100'); t.classList.add('scale-95', 'opacity-0'); setTimeout(() => t.classList.add('hidden'), 300); }, 3500); 
 };
 
-window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+window.openModal = (id) => { 
+    document.getElementById(id).classList.remove('hidden'); 
+    document.getElementById(id).classList.add('flex'); 
+};
+window.closeModal = (id) => {
+    document.getElementById(id).classList.add('hidden');
+    document.getElementById(id).classList.remove('flex');
+};
 window.toggleMobileMenu = () => document.getElementById('mobile-menu').classList.toggle('hidden');
 
 // Logika Baru: Melipat (Collapse) Sidebar
@@ -305,18 +312,65 @@ const calculateTotalKas = () => {
 
 const processPendingDeposits = () => {
     pendingDeposits.sort((a, b) => new Date(a.date) - new Date(b.date));
-    let tbody = pendingDeposits.length ? '' : `<tr><td colspan="4" class="px-6 py-8 text-center text-theme-muted font-bold text-[10px] uppercase tracking-widest border-b border-theme-border border-dashed"><i class="ph ph-check-circle text-2xl block mb-2 opacity-50"></i>Belum ada setoran POS masuk.</td></tr>`;
-    pendingDeposits.forEach(d => {
-        tbody += `
-            <tr class="border-b border-theme-border/30 hover:bg-theme-bg/80 even:bg-theme-bg/30 transition-colors">
-                <td class="px-5 py-3 text-theme-text font-black">${d.date.split('-').reverse().join('/')} <span class="text-[9px] text-theme-muted ml-2 font-bold bg-theme-bg px-2 py-1 rounded border border-theme-border">${d.time||''}</span></td>
-                <td class="px-5 py-3"><span class="px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/30 rounded-lg text-[8px] font-black uppercase tracking-widest"><i class="ph ph-user mr-1"></i>${d.cashierName}</span></td>
-                <td class="px-5 py-3 text-right font-black text-emerald-500 text-sm tracking-tight drop-shadow-sm">${formatRp(d.amount)}</td>
-                <td class="px-5 py-3 text-center">
-                    <button onclick="window.openConfirmDeposit('${d.id}', ${d.amount}, '${d.date}', '${d.source}', '${d.cashierName}')" class="px-4 py-2 bg-emerald-500 text-slate-900 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-md hover:-translate-y-0.5 transition-transform"><i class="ph ph-check-circle mr-1"></i>Terima</button>
-                </td>
-            </tr>`;
-    }); document.getElementById('pending-table-body').innerHTML = tbody;
+    
+    // Tarik elemen UI Notifikasi
+    const tbody = document.getElementById('pending-table-body');
+    const badge = document.getElementById('pending-badge');
+    const arrow = document.getElementById('pending-arrow');
+    const title = document.getElementById('pending-title');
+    const subtitle = document.getElementById('pending-subtitle');
+    const iconBg = document.getElementById('pending-icon-bg');
+    const icon = document.getElementById('pending-icon');
+
+    // Mencegah error jika elemen UI belum ter-load (misal saat buka tab lain)
+    if(!badge || !tbody) return;
+
+    if(pendingDeposits.length > 0) {
+        // Mode Notifikasi Aktif (Warna Merah)
+        badge.innerText = pendingDeposits.length;
+        badge.classList.remove('hidden');
+        arrow.classList.add('hidden');
+        title.innerText = "Setoran Menunggu";
+        title.classList.add('text-rose-500');
+        subtitle.innerText = `Ada ${pendingDeposits.length} setoran butuh verifikasi`;
+        iconBg.classList.replace('bg-theme-bg', 'bg-rose-500/10');
+        iconBg.classList.replace('border-theme-border', 'border-rose-500/30');
+        icon.classList.replace('text-theme-muted', 'text-rose-500');
+        icon.classList.add('animate-bounce');
+
+        // Render List dalam Modal
+        let tbodyHtml = '';
+        pendingDeposits.forEach(d => {
+            tbodyHtml += `
+                <tr class="border border-theme-border hover:bg-theme-card transition-colors bg-theme-bg rounded-xl mb-3 flex flex-wrap items-center justify-between p-3 shadow-sm mx-1 mt-2">
+                    <td class="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0"><i class="ph ph-receipt text-lg"></i></div>
+                        <div>
+                            <p class="text-theme-text font-bold text-xs">${d.date.split('-').reverse().join('/')} <span class="text-[9px] font-medium text-theme-muted ml-1">${d.time||''}</span></p>
+                            <span class="inline-block mt-0.5 px-2 py-0.5 bg-amber-500/10 text-amber-500 rounded text-[9px] font-bold uppercase tracking-widest border border-amber-500/20"><i class="ph ph-user mr-1"></i>${d.cashierName}</span>
+                        </div>
+                    </td>
+                    <td class="text-right font-black text-emerald-500 text-base tracking-tight w-1/2 sm:w-auto pr-4">${formatRp(d.amount)}</td>
+                    <td class="w-1/2 sm:w-auto flex justify-end">
+                        <button onclick="window.openConfirmDeposit('${d.id}', ${d.amount}, '${d.date}', '${d.source}', '${d.cashierName}')" class="px-5 py-2.5 bg-emerald-500 text-slate-900 rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-md hover:-translate-y-0.5 transition-transform"><i class="ph ph-check-circle mr-1 text-sm"></i> Terima</button>
+                    </td>
+                </tr>`;
+        });
+        tbody.innerHTML = tbodyHtml;
+    } else {
+        // Mode Bersih / Kosong (Netral)
+        badge.classList.add('hidden');
+        arrow.classList.remove('hidden');
+        title.innerText = "Konfirmasi Setoran";
+        title.classList.remove('text-rose-500');
+        subtitle.innerText = "Semua setoran sudah dikonfirmasi";
+        iconBg.classList.replace('bg-rose-500/10', 'bg-theme-bg');
+        iconBg.classList.replace('border-rose-500/30', 'border-theme-border');
+        icon.classList.replace('text-rose-500', 'text-theme-muted');
+        icon.classList.remove('animate-bounce');
+
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-theme-muted font-bold text-[10px] uppercase tracking-widest"><i class="ph ph-check-circle text-5xl block mb-2 opacity-30 text-emerald-500 mx-auto"></i>Semua data rapi.</td></tr>`;
+    }
 };
 
 window.openConfirmDeposit = (depId, amount, date, source, cashierName) => {
@@ -823,7 +877,6 @@ const renderCategories = () => {
     incList.innerHTML = ''; expList.innerHTML = '';
     
     categories.forEach(c => {
-        // PERUBAHAN: Menambahkan tombol Edit (Pensil Kuning)
         let actionBtns = c.isSystem ? '' : `
             <button onclick="window.editCategory('${c.id}')" class="text-amber-500 hover:text-amber-400 p-1 bg-theme-card border border-theme-border rounded mr-1 shadow-sm transition-colors" title="Edit Kategori"><i class="ph ph-pencil-simple"></i></button>
             <button onclick="window.deleteCategory('${c.id}')" class="text-rose-500 hover:text-rose-400 p-1 bg-theme-card border border-theme-border rounded shadow-sm transition-colors" title="Hapus Kategori"><i class="ph ph-trash"></i></button>
@@ -924,16 +977,12 @@ document.getElementById('category-form').addEventListener('submit', async (e) =>
         const color = document.getElementById('cat-color').value;
         const icon = document.getElementById('cat-icon').value || 'ph-tag';
 
-        // Cek duplikat: Boleh pakai nama sama HANYA JIKA dia sedang mengedit kategori miliknya sendiri
         if(!id || (id && name.toLowerCase() !== (oldName || '').toLowerCase())) {
             if(categories.some(c => c.name.toLowerCase() === name.toLowerCase())) throw new Error("Nama kategori sudah digunakan!");
         }
         
         if (id) {
-            // PROSES EDIT KATEGORI
             await updateDoc(getPosDoc("finance_categories", id), { name, type, color, icon });
-            
-            // JIKA nama kategori diubah, update juga semua transaksi lama yang pakai nama ini!
             if(name !== oldName && oldName) {
                 const mutsToUpdate = mutations.filter(m => m.category === oldName);
                 for(let m of mutsToUpdate) {
@@ -942,7 +991,6 @@ document.getElementById('category-form').addEventListener('submit', async (e) =>
             }
             showToast("Kategori berhasil diperbarui", "success"); 
         } else {
-            // PROSES TAMBAH KATEGORI
             await addDoc(getPosCol("finance_categories"), { name, type, color, icon });
             showToast("Kategori baru ditambahkan", "success"); 
         }
