@@ -562,8 +562,9 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="window.confirmDeleteArchive()" class="px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/30 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-colors flex items-center"><i class="ph ph-arrow-u-up-left mr-1 sm:mr-2 text-sm"></i><span class="hidden sm:inline">Hapus & Kembalikan Data</span></button>
-                    <button onclick="window.closeModal('library-detail-modal')" class="w-10 h-10 bg-theme-bg text-theme-text rounded-full flex items-center justify-center border border-theme-border hover:bg-theme-accent hover:text-slate-900 transition-colors"><i class="ph ph-x text-xl"></i></button>
+                    <button onclick="window.downloadLibraryExcel()" class="px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-colors flex items-center shadow-sm"><i class="ph ph-file-xls mr-1 sm:mr-2 text-sm"></i><span class="hidden sm:inline">Unduh Excel</span></button>
+                    <button onclick="window.confirmDeleteArchive()" class="px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/30 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-colors flex items-center shadow-sm"><i class="ph ph-arrow-u-up-left mr-1 sm:mr-2 text-sm"></i><span class="hidden sm:inline">Kembalikan</span></button>
+                    <button onclick="window.closeModal('library-detail-modal')" class="w-10 h-10 bg-theme-bg text-theme-text rounded-full flex items-center justify-center border border-theme-border hover:bg-theme-accent hover:text-slate-900 transition-colors shadow-sm"><i class="ph ph-x text-xl"></i></button>
                 </div>
             </div>
             <div class="mt-6 flex-1 space-y-6">
@@ -648,7 +649,7 @@
                             <label class="block text-[9px] font-black text-theme-muted mb-2 uppercase tracking-widest">Nominal (Rp)</label>
                             <div class="relative">
                                 <span class="absolute left-4 top-3.5 text-sm font-black text-rose-500">Rp</span>
-                                <input type="text" id="exp-amount" placeholder="0" class="w-full pl-10 pr-4 py-3 bg-theme-bg border border-theme-border rounded-xl text-theme-text text-base sm:text-lg font-black outline-none focus:border-rose-500 shadow-inner transition-colors"/>
+                                <input type="text" id="exp-amount" oninput="window.formatCurrencyInput(this)" placeholder="0" class="w-full pl-10 pr-4 py-3 bg-theme-bg border border-theme-border rounded-xl text-theme-text text-base sm:text-lg font-black outline-none focus:border-rose-500 shadow-inner transition-colors"/>
                             </div>
                         </div>
                         <div>
@@ -711,7 +712,7 @@
                     <label class="block text-[9px] font-black text-theme-muted mb-2 uppercase tracking-widest">Nominal (Rp)</label>
                     <div class="relative">
                         <span class="absolute left-4 top-3.5 text-sm font-black text-emerald-500">Rp</span>
-                        <input type="text" id="inc-amount" required placeholder="0" class="w-full pl-10 pr-4 py-3 bg-theme-bg border border-theme-border rounded-xl text-theme-text text-base sm:text-lg font-black outline-none focus:border-emerald-500 shadow-inner transition-colors"/>
+                        <input type="text" id="inc-amount" oninput="window.formatCurrencyInput(this)" required placeholder="0" class="w-full pl-10 pr-4 py-3 bg-theme-bg border border-theme-border rounded-xl text-theme-text text-base sm:text-lg font-black outline-none focus:border-emerald-500 shadow-inner transition-colors"/>
                     </div>
                 </div>
                 <div>
