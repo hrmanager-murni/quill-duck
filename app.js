@@ -1172,7 +1172,7 @@ const renderTbCharts = (catIn, catOut, incCanvasId, expCanvasId, isLib = false) 
 
 window.openArsipModal = () => {
     if(!window.tempArsipData) return;
-    window.tempArsipData.notes = window.tempTbNotes;
+    window.tempArsipData.notes = [...window.tempTbNotes]; // Diubah agar data array di-clone (dicopy) secara utuh
     
     const startStr = window.tempArsipData.startDate.split('-').reverse().join('/'); const endStr = window.tempArsipData.endDate.split('-').reverse().join('/');
     document.getElementById('arsip-name').value = '';
@@ -1210,7 +1210,7 @@ const renderArchives = () => {
         return;
     }
     archivesData.forEach(a => {
-        let noteSnippet = a.notes && a.notes.length > 0 ? a.notes[0] : 'Tidak ada catatan...';
+        let noteSnippet = a.notes && a.notes.length > 0 ? (a.notes.length > 1 ? `${a.notes.length} Catatan tersimpan...` : a.notes[0]) : 'Tidak ada catatan...';
         
         container.innerHTML += `
             <div onclick="window.openArchiveDetail('${a.id}')" class="library-token bg-theme-bg p-5 rounded-2xl border border-theme-border shadow-sm flex flex-col justify-between cursor-pointer group">
@@ -1282,6 +1282,10 @@ window.openArchiveDetail = async (archiveId) => {
 
     renderTbCharts(catIn, catOut, 'lib-chart-in', 'lib-chart-out', true);
     
+    // Simpan data ke memori global untuk kebutuhan fungsi unduh Excel
+    window.currentLibraryArchive = a;
+    window.currentLibraryMuts = linkedMuts;
+
     hideLoading();
     document.getElementById('library-detail-modal').classList.remove('hidden');
     document.getElementById('library-detail-modal').classList.add('flex');
@@ -1509,6 +1513,131 @@ window.downloadLaporanExcel = async () => {
         
         hideLoading();
         showToast("Laporan Excel berhasil diunduh!", "success");
+    } catch (err) {
+        hideLoading();
+        console.error(err);
+        showToast("Gagal membuat file Excel.", "error");
+    }
+};
+
+window.downloadLibraryExcel = async () => {
+    if (!window.currentLibraryArchive || !window.currentLibraryMuts) return showToast("Data arsip belum termuat!", "error");
+    
+    showLoading("Menyiapkan File Excel...");
+    try {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Laporan Arsip Kas');
+
+        const archive = window.currentLibraryArchive;
+        const startStr = archive.startDate.split('-').reverse().join('/');
+        const endStr = archive.endDate.split('-').reverse().join('/');
+
+        // Menghitung Saldo Brankas Global (opsional, karena riwayat brankas terpisah dari mutasi kas)
+        let totalBrankas = 0;
+        brankasData.forEach(b => {
+            const amount = parseFloat(b.amount) || 0;
+            if (b.type === 'in_from_kas' || b.type === 'in_external') totalBrankas += amount;
+            else if (b.type === 'out_to_kas') totalBrankas -= amount;
+        });
+
+        sheet.mergeCells('A1:E1');
+        const titleCell = sheet.getCell('A1');
+        titleCell.value = 'LAPORAN ARUS KAS (ARSIP) - PAWON NUSANTARA';
+        titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+        titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F2937' } }; 
+        titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        
+        sheet.mergeCells('A2:E2');
+        const periodCell = sheet.getCell('A2');
+        periodCell.value = `Periode: ${startStr} s/d ${endStr}`;
+        periodCell.font = { name: 'Arial', size: 11, italic: true };
+        periodCell.alignment = { vertical: 'middle', horizontal: 'center' };
+
+        sheet.addRow([]); 
+        sheet.addRow(['REKAPITULASI KAS', '', '', '', '']).font = { bold: true };
+        sheet.mergeCells('A4:E4');
+        
+        const rekapData = [
+            ['Judul Arsip', archive.name],
+            ['Total Pemasukan (Kas Masuk)', archive.totalIncome],
+            ['Total Pengeluaran (Kas Keluar)', archive.totalExpense],
+            ['Sisa Kas Operasional (Laba Bersih)', archive.netProfit],
+            ['Total Saldo Brankas (Terkini)', totalBrankas]
+        ];
+
+        rekapData.forEach((row, idx) => {
+            const r = sheet.addRow([row[0], row[1]]);
+            r.getCell(1).font = { bold: true };
+            if(idx > 0) r.getCell(2).numFmt = '"Rp "#,##0'; 
+            
+            let color = 'FFFFFFFF';
+            if (idx === 1) color = 'FFD1FAE5'; 
+            else if (idx === 2) color = 'FFFEE2E2'; 
+            else if (idx === 3) color = 'FFFEF3C7'; 
+            else if (idx === 4) color = 'FFE0F2FE'; 
+
+            r.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+            r.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+            r.getCell(2).font = { bold: true };
+        });
+
+        // Tambahkan Catatan Jika Ada
+        if(archive.notes && archive.notes.length > 0) {
+            sheet.addRow([]);
+            sheet.addRow(['CATATAN LAPORAN:', '', '', '', '']).font = { bold: true };
+            archive.notes.forEach(note => {
+                const r = sheet.addRow([`- ${note}`, '', '', '', '']);
+                r.getCell(1).font = { italic: true };
+                sheet.mergeCells(`A${r.number}:E${r.number}`);
+            });
+        }
+
+        sheet.addRow([]); 
+        
+        const headerRow = sheet.addRow(['Tanggal', 'Kategori', 'Keterangan', 'Tipe Transaksi', 'Nominal']);
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        headerRow.alignment = { horizontal: 'center' };
+        headerRow.eachCell(cell => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } }; 
+            cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+        });
+
+        let sortedMuts = window.currentLibraryMuts.sort((a, b) => new Date(a.date) - new Date(b.date)); 
+
+        sortedMuts.forEach(m => {
+            const typeLabel = m.type === 'income' ? 'Pemasukan' : 'Pengeluaran';
+            const row = sheet.addRow([
+                m.date.split('-').reverse().join('/'),
+                m.category,
+                m.description || '-',
+                typeLabel,
+                parseFloat(m.amount) || 0
+            ]);
+            
+            row.getCell(5).numFmt = '"Rp "#,##0'; 
+            
+            if(m.type === 'income') row.getCell(4).font = { color: { argb: 'FF059669' }, bold: true }; 
+            else row.getCell(4).font = { color: { argb: 'FFE11D48' }, bold: true }; 
+
+            row.eachCell(cell => { cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }; });
+        });
+
+        sheet.columns = [ { width: 15 }, { width: 25 }, { width: 45 }, { width: 20 }, { width: 25 } ];
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `Laporan_Arsip_${archive.name.replace(/ /g, '_')}_${startStr.replace(/\//g,'-')}_sd_${endStr.replace(/\//g,'-')}.xlsx`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(url);
+        
+        hideLoading();
+        showToast("Arsip Excel berhasil diunduh!", "success");
     } catch (err) {
         hideLoading();
         console.error(err);
