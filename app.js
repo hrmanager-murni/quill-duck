@@ -481,12 +481,13 @@ window.fetchRawTransactionsForSetoran = () => {
 };
 
 window.filterMutasiTables = () => {
-    const incCat = document.getElementById('filter-income-cat').value;
-    const incDate = document.getElementById('filter-income-date').value;
+    // Tambahkan pengaman (?.) dan nilai default (|| 'ALL') jika UI filter dihapus
+    const incCat = document.getElementById('filter-income-cat')?.value || 'ALL';
+    const incDate = document.getElementById('filter-income-date')?.value || '';
     const incSearch = document.getElementById('filter-income-search')?.value.toLowerCase() || '';
 
-    const expCat = document.getElementById('filter-expense-cat').value;
-    const expDate = document.getElementById('filter-expense-date').value;
+    const expCat = document.getElementById('filter-expense-cat')?.value || 'ALL';
+    const expDate = document.getElementById('filter-expense-date')?.value || '';
     const expSearch = document.getElementById('filter-expense-search')?.value.toLowerCase() || '';
 
     // Filter Pemasukan
@@ -586,6 +587,67 @@ const renderMutasiTable = (containerId, data, type) => {
                 ${bulkHtml}
             </div>`;
     });
+};
+
+// FUNGSI BARU: Membuka Rekap Data Mutasi per Kategori
+window.openRekapKategori = (type) => {
+    const titleEl = document.getElementById('rekap-modal-title');
+    const iconBg = document.getElementById('rekap-modal-icon');
+    const listContainer = document.getElementById('rekap-list-container');
+    const totalEl = document.getElementById('rekap-total-amount');
+
+    // 1. Ubah gaya pop-up sesuai tipe (Income / Expense)
+    if (type === 'income') {
+        titleEl.innerText = "Rekap Pemasukan";
+        iconBg.className = "w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0";
+        totalEl.className = "text-lg font-black text-emerald-500 tracking-tight drop-shadow-sm";
+    } else {
+        titleEl.innerText = "Rekap Pengeluaran";
+        iconBg.className = "w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0";
+        totalEl.className = "text-lg font-black text-rose-500 tracking-tight drop-shadow-sm";
+    }
+
+    // 2. Hitung total per kategori
+    let catTotals = {};
+    let grandTotal = 0;
+
+    mutations.filter(m => m.type === type && !m.isArchived && !m.isDeleted).forEach(m => {
+        const amount = parseFloat(m.amount) || 0;
+        catTotals[m.category] = (catTotals[m.category] || 0) + amount;
+        grandTotal += amount;
+    });
+
+    // 3. Urutkan kategori dari nominal terbesar ke terkecil
+    const sortedCats = Object.keys(catTotals).sort((a, b) => catTotals[b] - catTotals[a]);
+
+    // 4. Gambar (Render) daftarnya ke layar HTML
+    listContainer.innerHTML = '';
+    
+    if (sortedCats.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-8 text-theme-muted font-bold text-[10px] uppercase tracking-widest"><i class="ph ph-receipt text-4xl block mb-2 opacity-30 mx-auto"></i>Belum ada transaksi.</div>`;
+    } else {
+        sortedCats.forEach(catName => {
+            const catObj = categories.find(c => c.name === catName);
+            const color = catObj ? catObj.color : '#64748b';
+            const icon = catObj && catObj.icon ? catObj.icon : 'ph-tag';
+            const amount = catTotals[catName];
+
+            listContainer.innerHTML += `
+                <div class="flex items-center justify-between p-3 bg-theme-card border border-theme-border rounded-xl shadow-sm hover:border-theme-accent/50 transition-colors group">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110" style="background-color: ${color}">
+                            <i class="ph ${icon} text-lg drop-shadow-sm"></i>
+                        </div>
+                        <span class="text-xs font-bold text-theme-text uppercase tracking-widest">${catName}</span>
+                    </div>
+                    <span class="text-sm font-black text-theme-text tracking-tight">${formatRp(amount)}</span>
+                </div>
+            `;
+        });
+    }
+
+    totalEl.innerText = formatRp(grandTotal);
+    window.openModal('rekap-modal');
 };
 
 window.deleteMutation = (id) => {
