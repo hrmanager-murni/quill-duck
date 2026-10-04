@@ -51,8 +51,11 @@ const showToast = (msg, type = 'info') => {
 };
 
 window.openModal = (id) => { 
-    document.getElementById(id).classList.remove('hidden'); 
-    document.getElementById(id).classList.add('flex'); 
+    const modal = document.getElementById(id);
+    modal.classList.remove('hidden'); 
+    
+    // Pastikan tiga class flexbox penengah (centering) ini selalu aktif
+    modal.classList.add('flex', 'justify-center', 'items-center'); 
 };
 window.closeModal = (id) => {
     document.getElementById(id).classList.add('hidden');
@@ -683,8 +686,8 @@ window.openExpenseModal = () => {
     // RESET array bulkItems menjadi bersih (hanya 1 baris kosong)
     bulkItems = [{name: '', price: ''}];
     
-    window.setExpenseMode('single'); document.getElementById('expense-modal').classList.remove('hidden');
-    document.getElementById('expense-modal').classList.add('flex');
+    window.setExpenseMode('single'); 
+    window.openModal('expense-modal');
 };
 
 window.setExpenseMode = (mode) => {
@@ -803,7 +806,7 @@ document.getElementById('expense-form').addEventListener('submit', async (e) => 
 window.openIncomeModal = () => {
     document.getElementById('inc-id').value = ''; document.getElementById('income-modal-title').innerHTML = '<i class="ph ph-arrow-down-left mr-2 text-lg"></i> Pemasukan Manual';
     document.getElementById('inc-date').value = getTodayYMD(); document.getElementById('inc-desc').value = ''; document.getElementById('inc-amount').value = '';
-    document.getElementById('income-modal').classList.remove('hidden');
+    window.openModal('income-modal');
 };
 
 document.getElementById('income-form').addEventListener('submit', async (e) => {
@@ -846,7 +849,7 @@ window.editMutation = (id, isSetoran = false) => {
             document.getElementById('exp-amount').value = m.amount.toLocaleString('id-ID'); 
             document.getElementById('exp-desc').value = m.description; 
         }
-        document.getElementById('expense-modal').classList.remove('hidden');
+        window.openModal('expense-modal');
     } else if (m.type === 'income') {
         document.getElementById('inc-id').value = m.id; document.getElementById('income-modal-title').innerHTML = '<i class="ph ph-pencil-simple mr-2 text-lg"></i> Edit Pemasukan';
         document.getElementById('inc-date').value = m.date; 
@@ -860,7 +863,7 @@ window.editMutation = (id, isSetoran = false) => {
         }
         
         document.getElementById('inc-amount').value = m.amount.toLocaleString('id-ID'); document.getElementById('inc-desc').value = m.description;
-        document.getElementById('income-modal').classList.remove('hidden');
+        window.openModal('income-modal');
     }
 };
 
