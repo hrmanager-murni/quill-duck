@@ -679,7 +679,12 @@ window.openExpenseModal = () => {
     document.getElementById('exp-id').value = ''; document.getElementById('expense-modal-title').innerHTML = '<i class="ph ph-arrow-up-right mr-2 text-lg"></i> Catat Pengeluaran';
     document.getElementById('exp-date').value = getTodayYMD(); document.getElementById('exp-desc').value = ''; document.getElementById('exp-amount').value = '';
     document.getElementById('exp-bulk-title').value = '';
+    
+    // RESET array bulkItems menjadi bersih (hanya 1 baris kosong)
+    bulkItems = [{name: '', price: ''}];
+    
     window.setExpenseMode('single'); document.getElementById('expense-modal').classList.remove('hidden');
+    document.getElementById('expense-modal').classList.add('flex');
 };
 
 window.setExpenseMode = (mode) => {
