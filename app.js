@@ -238,7 +238,17 @@ async function initAuth() {
                     else trashMutations.push({ id: d.id, ...data });
                 } else { mutations.push({ id: d.id, ...data }); }
             });
-            mutations.sort((a, b) => new Date(b.date) - new Date(a.date));
+            // Mengurutkan berdasarkan tanggal (descending). 
+            // Jika tanggal sama, urutkan berdasarkan waktu pembuatan (createdAt).
+            mutations.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                if (dateA.getTime() !== dateB.getTime()) {
+                    return dateB - dateA;
+                }
+                // Jika tanggal sama, gunakan createdAt (jam input asli)
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
             trashMutations.sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
             
             calculateTotalKas(); window.applyDashboardFilter(); window.filterMutasiTables(); renderTrashTable();
@@ -566,6 +576,13 @@ const renderMutasiTable = (containerId, data, type) => {
 
         let archiveTag = m.isArchived ? `<span class="px-1.5 py-0.5 bg-theme-accent/10 text-theme-accent text-[8px] rounded uppercase font-bold border border-theme-accent/20">Arsip</span>` : '';
         let editLabel = m.updatedAt ? `<span class="text-[8px] italic opacity-50 border-l border-theme-border/50 pl-1.5">Diedit ${formatEditTime(m.updatedAt)}</span>` : '';
+        
+        // Ambil jam dan menit dari createdAt
+        let inputTime = '';
+        if (m.createdAt) {
+            const d = new Date(m.createdAt);
+            inputTime = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+        }
 
         // TATA LETAK BARU: Horizontal dan sangat padat/kompak (Bersih dari duplikasi)
         htmlContent += `
@@ -580,15 +597,13 @@ const renderMutasiTable = (containerId, data, type) => {
                         <div class="flex flex-col flex-1 min-w-0">
                             <div class="flex items-center space-x-2 mb-0.5">
                                 <span class="text-[9px] font-black uppercase tracking-widest text-theme-muted truncate flex items-center">
-                                    ${m.category}
-                                    ${isSystem ? `<i class="ph ph-lock-key ml-1.5 text-[10px] opacity-70" title="Data Sistem"></i>` : ''}
+                                    ${m.category}${isSystem ? `<i class="ph ph-lock-key ml-1.5 text-[10px] opacity-70" title="Data Sistem"></i>` : ''}
                                 </span>
                                 ${archiveTag}
                             </div>
                             <h4 class="text-xs sm:text-sm font-bold text-theme-text truncate leading-tight">${m.description}</h4>
                             <div class="flex items-center space-x-1.5 mt-1 text-[9px] font-medium text-theme-muted">
-                                <span><i class="ph ph-calendar-blank mr-1"></i>${m.date.split('-').reverse().join('/')}</span>
-                                ${editLabel}
+                                <span><i class="ph ph-calendar-blank mr-1"></i>${m.date.split('-').reverse().join('/')} <span class="ml-1 opacity-70">${inputTime}</span></span>${editLabel}
                             </div>
                         </div>
                     </div>
